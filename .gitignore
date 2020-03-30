@@ -1,0 +1,8 @@
+target/
+bin/
+.antlr*.jar
+*-gen
+/*-bin/
+model
+*/generated/
+.metadata/
