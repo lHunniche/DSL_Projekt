@@ -2,8 +2,126 @@ grammar dk.klevang.Iotdsl with org.eclipse.xtext.common.Terminals
 
 generate iotdsl "http://www.klevang.dk/Iotdsl"
 
-Model:
-	greetings+=Greeting*;
+Program:
+	(programElements += ProgramElement)*
+;
+
+ProgramElement:
+	Board | EndpointType
+;
+
+Board:
+	'board' name=ID '{' (sensors += Sensor)* internet = Internet? '}'
+;
 	
-Greeting:
-	'Hello' name=ID '!';
+Sensor:
+	{Sensor} 'sensor' name=ID sensorSettings = SensorSettings 
+	'{' 
+	(conditions += Condition)* 
+	'endpoints' '=' (endpoints += [EndpointType])+ //was Endpoint
+	'}'
+;
+
+SensorSettings:
+	'(' pins = Pins filter = Filter?')'
+;
+
+Pins:
+	'pin' 'in' '=' pinIn = INT ';' 'pin' 'out' '=' pinOut = INT
+;
+
+Condition:
+	'when' condition=BooleanExp 'then' 'sampling' '=' frequency = Frequency
+;
+
+Frequency:
+	{Frequency} value=INT ('Hz' | 'per' unit = Unit);
+
+Unit:
+	'day' | 'hour' | 'minute' | 'second' | 'ms'
+;    
+
+Filter:
+	';' 'filtering' '=' filterType = FilterType;
+
+FilterType:
+	'mean' INT | 'median' INT;
+
+Internet: 
+	'internet' '(' ssid = Ssid ';' internetPass = InternetPass ')';
+
+InternetPass: 
+	'password' '=' STRING;
+
+Ssid: 
+	'ssid' '=' STRING;
+
+EndpointType: 
+	Serial | Webserver
+;
+
+Serial:
+	'serial' name=ID '(' serialPort = SerialPort (';' baud = Baud)? ';' output = Output ')'
+;
+
+Webserver:
+	'webserver' name=ID '(' host = Host ';' webPort = WebPort ';' webEndpoint += WebEndpoint+ ')'
+;
+
+WebEndpoint:
+	'endpoints' '=' STRING (';' STRING)*
+;
+
+WebPort:
+	'port' '=' INT
+;
+
+SerialPort:
+	'port' '=' STRING
+;
+
+Baud:
+	'baud' '=' INT
+;
+
+Output:
+	OutputType '=' STRING
+;
+
+OutputType:
+	'csv' | 'tsv'
+;
+
+Host:
+	'host' '=' STRING
+;
+
+BooleanExp returns BooleanExp:
+	Or
+;
+
+Or returns BooleanExp:
+	And (
+		({Or.left=current} 'or')
+		right=And
+	)*
+;
+
+And returns BooleanExp:
+	Equality (
+		({And.left=current} 'and')
+		right=Equality
+	)*
+;
+Equality returns BooleanExp:
+	Comparison (
+		{Equlity.left=current} op = (">"|"<"|"!="|"==")
+		right = Comparison
+	)*
+;
+
+Comparison returns BooleanExp:
+	{IntConstant} value=INT |  
+	{BoolConstant} value=('true'|'false') |
+	{ThisConstant} value = 'this' 
+;

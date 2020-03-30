@@ -8,5 +8,22 @@ Bundle-SymbolicName: dk.klevang.iotdsl; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.xtext,
  org.eclipse.xtext.xbase,
- org.eclipse.equinox.common;bundle-version="3.5.0"
+ org.eclipse.equinox.common;bundle-version="3.5.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
+ org.eclipse.xtext.util,
+ org.eclipse.emf.common,
+ org.antlr.runtime;bundle-version="[3.2.0,3.2.1)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: dk.klevang.iotdsl,
+ dk.klevang.generator,
+ dk.klevang.parser.antlr,
+ dk.klevang.validation,
+ dk.klevang.services,
+ dk.klevang.iotdsl.impl,
+ dk.klevang.serializer,
+ dk.klevang.parser.antlr.internal,
+ dk.klevang.scoping,
+ dk.klevang,
+ dk.klevang.iotdsl.util
+Import-Package: org.apache.log4j
