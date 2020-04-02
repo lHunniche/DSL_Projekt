@@ -14,16 +14,16 @@ import _thread
 pycom.heartbeat(False)
 
 
-#---- ENDPOINTS -----#
+#____________  ENDPOINTS _____________________#
 light_endpoints = ["http://www.klevang.dk:19409/lightdata"]
 temp_endpoints = ["http://www.klevang.dk:19409/tempdata"]
 
-#---- FILTER CONFIGURATIONS ----- #
+#___________ FILTER CONFIGURATIONS ____________#
 light_filter_count = 10
 temp_filter_count = 20
 
 
-#----- INTERNET VARIABLES -----#
+#___________ INTERNET VARIABLES _______________#
 ssid = 'Xrosby-Wifi'
 wifi_pass = 'boguspass'
 
@@ -32,7 +32,7 @@ default_light_sampling_rate = 0.1
 default_temp_sampling_rate = 0.1
 
 
-#----------- INTERNET CONFIGURATIONS ------------#
+#___________ INTERNET CONFIGURATIONS _______________#
 
 def connect():
     global wifi_pass
@@ -55,7 +55,7 @@ def post(url, body):
                          "Content-Type": "application/json", "Accept": "application/json"}, json=body)
     res.close()
 
-#----------- LIGHT SENSOR CONFIGURATIONS -------------#
+#____________ LIGHT SENSOR CONFIGURATIONS _____________#
 
 
 def init_light(als_sda='P22', als_scl='P21'):
@@ -105,7 +105,7 @@ def start_light_sampling():
             }
             post(url, body)
 
-#------- TEMP SENSOR CONFIGURATIONS ------#
+#__________ TEMP SENSOR CONFIGURATIONS _____________ #
 
 
 def init_temp(temp_sda='P16', temp_scl='P19'):
@@ -166,7 +166,7 @@ def start_temp_sampling():
             post(url, body)
 
 
-# _______ UTILITY FUNCTIONS ________#
+# ____________ UTILITY FUNCTIONS ______________#
 def median(intermediate_points):
     sorted(intermediate_points)
     index = int(len(intermediate_points)/2)
@@ -182,7 +182,7 @@ def get_intermediate_sampling_rate(sample_rate_function, count):
         intermediate_sampling_rate = seconds/count
         return intermediate_sampling_rate
 
-# MAIN AND RUN METHODS
+# _________ MAIN AND RUN METHODS _________ #
 def init_sensors():
     _thread.start_new_thread(start_light_sampling, ())
     _thread.start_new_thread(start_temp_sampling, ())
@@ -192,5 +192,4 @@ def run():
     connect()
     init_sensors()
 
-# if __name__ == "main":
 run()
