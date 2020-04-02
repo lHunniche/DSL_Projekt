@@ -69,13 +69,12 @@ def get_als_sampling_rate():
     lux = get_lux()
     if lux > 200:
         return 0.1
-    elif lux > 50:
+    elif lux > 100:
         return 0.3
-    elif lux > 0:
-        return 0.01
+    elif lux >= 0:
+        return 1.0
     else:
         return default_light_sampling_rate
-
 
 def get_lux():
     global als
