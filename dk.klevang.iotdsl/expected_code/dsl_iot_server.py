@@ -24,6 +24,6 @@ def lightdata():
     _file.close()
     return "Submitted " + light + " to file."
 
-print(__name__)
+
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=8081, threaded=True)  # 19409
