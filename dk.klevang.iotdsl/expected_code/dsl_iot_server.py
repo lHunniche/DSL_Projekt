@@ -12,7 +12,7 @@ def tempdata():
     _file = open("tempdata.csv", "a")
     _file.write(temp + "\n")
     _file.close()
-    return "Submitted " + temp + " to file. "
+    return "Submitted " + str(temp) + " to file. "
 
 
 @app.route("/lightdata", methods=["POST"])
@@ -22,7 +22,7 @@ def lightdata():
     _file = open("lightdata.csv", "a")
     _file.write(light + "\n")
     _file.close()
-    return "Submitted " + light + " to file."
+    return "Submitted " + str(light) + " to file."
 
 
 if __name__ == "__main__":
