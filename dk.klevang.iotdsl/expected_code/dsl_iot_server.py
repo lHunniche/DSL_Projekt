@@ -8,7 +8,7 @@ app = Flask(__name__)
 @app.route("/tempdata", methods=["POST"])
 def tempdata():
     body = request.get_json()
-    temp = body.get("temp")
+    temp = str(body.get("temp"))
     _file = open("tempdata.csv", "a")
     _file.write(temp + "\n")
     _file.close()
@@ -18,11 +18,11 @@ def tempdata():
 @app.route("/lightdata", methods=["POST"])
 def lightdata():
     body = request.get_json()
-    light = body.get("light")
+    light = str(body.get("light"))
     _file = open("lightdata.csv", "a")
     _file.write(light + "\n")
     _file.close()
-    return "Submitted " + str(light) + " to file."
+    return "Submitted " + light + " to file."
 
 
 if __name__ == "__main__":
