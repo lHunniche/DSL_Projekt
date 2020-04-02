@@ -61,8 +61,6 @@ def post(url, body):
 def init_light(als_sda='P22', als_scl='P21'):
     als = LTR329ALS01(sda=als_sda, scl=als_scl)
     return als
-
-
 als = init_light()
 
 
@@ -91,21 +89,11 @@ def get_light_sample():
     while len(intermediate_points) < light_filter_count:
         light_level = get_lux()
         intermediate_points.append(light_level)
-        sampling_rate = get_als_sampling_rate()
-        seconds = 1/sampling_rate
-        intermediate_sample_rate = seconds/light_filter_count
-        time.sleep(intermediate_sample_rate)
-        sorted(intermediate_points)
-    index = int(len(intermediate_points)/2)
-    return intermediate_points[index]
-
-
-def mean(sample_list, span):
-    start = sample_list.length() - span
-    collected = 0.0
-    for i in range(start, sample_list.length()):
-        collected = + sample_list[i]
-    return collected / span
+        intermediate_sampling_rate = get_intermediate_sampling_rate(\
+            get_als_sampling_rate\
+            , light_filter_count)
+        time.sleep(intermediate_sampling_rate)
+    return median(intermediate_points)
 
 
 def start_light_sampling():
@@ -161,11 +149,11 @@ def get_temp_sample():
     while len(intermediate_points) < temp_filter_count:
         temp = get_deg_c()
         intermediate_points.append(temp)
-        sampling_rate = get_temp_sampling_rate()
-        seconds = 1/sampling_rate
-        intermediate_sample_rate = seconds/temp_filter_count
-        time.sleep(intermediate_sample_rate)
-    return sum(intermediate_points)/len(intermediate_points)
+        intermediate_sampling_rate = get_intermediate_sampling_rate( \
+            get_temp_sampling_rate \
+            ,temp_filter_count)
+        time.sleep(intermediate_sampling_rate)
+    return mean(intermediate_points)
 
 
 def start_temp_sampling():
@@ -177,6 +165,23 @@ def start_temp_sampling():
                 "temp": temp_sample
             }
             post(url, body)
+
+
+# _______ UTILITY FUNCTIONS ________#
+def median(intermediate_points):
+    sorted(intermediate_points)
+    index = int(len(intermediate_points)/2)
+    return intermediate_points[index]
+
+def mean(intermediate_points):
+    return sum(intermediate_points)/len(intermediate_points)
+
+
+def get_intermediate_sampling_rate(sample_rate_function, count):
+        sampling_rate = sample_rate_function()
+        seconds = 1/sampling_rate
+        intermediate_sampling_rate = seconds/count
+        return intermediate_sampling_rate
 
 # MAIN AND RUN METHODS
 def init_sensors():
