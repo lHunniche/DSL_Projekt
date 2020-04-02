@@ -1,0 +1,26 @@
+serial s1 (port= ‘/dev/tty’, baud = 115200, output=Csv: ‘min_csv_log’)
+
+webserver ws1 (host = ‘www.klevang.dk’ , port = 80, endpoints = ‘tempdata’;‘lightdata’)
+
+
+board pycom
+{
+	sensor light (pin in =  22, pin out = 21, filtering = median 10) 
+    {
+        when this > 0 then sampling = 0.1 hz
+        when 200 < this then sampling = 0.3 hz
+        when 50> this then sampling = 1 per minute
+        endpoints = ws1.lightdata
+    }
+
+    sensor  temp (pin in =  16, pin out = 19, filtering = mean 24) 
+    {
+        when this > 0 then sampling = 0.1 mhz
+        when 45 < this then sampling = 2 per second
+        when 45 > this then sampling = 3 per minute
+        endpoints = ws1.tempdata
+    }
+
+internet (ssid=’Eduroam’,password=’finger_in_buttocks’)
+
+}
