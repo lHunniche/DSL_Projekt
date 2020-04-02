@@ -26,4 +26,8 @@ def lightdata():
 
 
 if __name__ == "__main__":
+    _file = open("lightdata.csv", "w")
+    _file.write("light\n")
+    _file = open("tempdata.csv", "w")
+    _file.write("temp\n")
     app.run(debug=True, host='0.0.0.0', port=8081, threaded=True)  # 19409
