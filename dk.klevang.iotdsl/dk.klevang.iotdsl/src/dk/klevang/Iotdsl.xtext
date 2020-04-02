@@ -18,7 +18,7 @@ Sensor:
 	{Sensor} 'sensor' name=ID sensorSettings = SensorSettings 
 	'{' 
 	(conditions += Condition)* 
-	'endpoints' '=' (endpoints += [EndpointType])+ //was Endpoint
+	'endpoints' '=' (endpoints += [EndpointType])+
 	'}'
 ;
 
@@ -65,7 +65,7 @@ Serial:
 ;
 
 Webserver:
-	'webserver' name=ID '(' host = Host ';' webPort = WebPort ';' webEndpoint += WebEndpoint+ ')'
+	'webserver' name=ID '(' host = Host ';' webPort = WebPort ';' webEndpoint += WebEndpoint')'
 ;
 
 WebEndpoint:
@@ -95,6 +95,7 @@ OutputType:
 Host:
 	'host' '=' STRING
 ;
+
 
 BooleanExp returns BooleanExp:
 	Or
