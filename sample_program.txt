@@ -1,0 +1,27 @@
+serial s1 (port= "/dev/tty"; baud = 115200; csv = "min_csv_log.csv")
+
+webserver ws1 (host = "www.klevang.dk"; port = 80; endpoints = "/tempdata"; "/lightdata")
+
+
+board esp32 
+{
+	sensor light (pin in =  26; pin out = 25; filtering = mean 10) 
+	{
+		when this > 0 then sampling = 1 Hz
+		when this > 10 then sampling = 3 Hz
+		when this > 20 then sampling = 1 per minute
+		endpoints = s1
+	}
+	
+
+	sensor temp (pin in =  17; pin out = 17; filtering = mean 24) 
+	{
+		when this > 0 then sampling = 1 Hz
+		when 45 < this then sampling = 2 per second
+		when 45 > this then sampling = 3 per minute
+		endpoints = ws1
+	}
+	
+	internet (ssid = "Eduroam"; password = "./passfile.txt")
+
+}
