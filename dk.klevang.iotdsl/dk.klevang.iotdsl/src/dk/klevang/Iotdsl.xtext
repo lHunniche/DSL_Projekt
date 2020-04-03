@@ -65,15 +65,15 @@ Serial:
 ;
 
 Webserver:
-	'webserver' name=ID '(' host = Host ';' webPort = WebPort ';' webEndpoint += WebEndpoint')'
+	'webserver' name=ID '(' host = Host ';' webPort = WebPort ';' 'endpoints' '=' webEndpoint = WebEndpoint')'
 ;
 
 WebEndpoint:
-	'endpoints' '=' STRING (';' STRING)*
+	STRING (';' STRING)*
 ;
 
 WebPort:
-	'port' '=' INT
+	'port' '=' port = INT
 ;
 
 SerialPort:
