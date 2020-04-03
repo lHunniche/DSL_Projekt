@@ -9,41 +9,21 @@ import pycom
 # Light sensor libraries
 from LTR329ALS01 import LTR329ALS01
 
+import board_config as cfg
 import _thread
 
 pycom.heartbeat(False)
 
-
-#____________  ENDPOINTS _____________________#
-light_endpoints = ["http://www.klevang.dk:19409/lightdata"]
-temp_endpoints = ["http://www.klevang.dk:19409/tempdata"]
-
-#___________ FILTER CONFIGURATIONS ____________#
-light_filter_count = 10
-temp_filter_count = 20
-
-
-#___________ INTERNET VARIABLES _______________#
-ssid = 'Xrosby-Wifi'
-wifi_pass = 'boguspass'
-
-# -------- SAMPLE RATES -----_#
-default_light_sampling_rate = 0.1
-default_temp_sampling_rate = 0.1
-
-
-#___________ INTERNET CONFIGURATIONS _______________#
-
 def connect():
-    global wifi_pass
-    global ssid
+    passw = cfg.internet["passw"]
+    ssid = cfg.internet["ssid"]
     wlan = WLAN(mode=WLAN.STA)
     nets = wlan.scan()
     for net in nets:
         print(net.ssid)
         if net.ssid == ssid:
             print(ssid, ' found!')
-            wlan.connect(net.ssid, auth=(net.sec, wifi_pass), timeout=5000)
+            wlan.connect(net.ssid, auth=(net.sec, passw), timeout=5000)
             while not wlan.isconnected():
                 machine.idle()  # save power while waiting
             print('WLAN connection to ', ssid, ' succesful!')
@@ -65,7 +45,7 @@ als = init_light()
 
 
 def get_als_sampling_rate():
-    global default_light_sampling_rate
+    default_light_sampling_rate = cfg.sampling_rates['light']
     lux = get_lux()
     if lux > 200:
         return 0.1
@@ -83,23 +63,23 @@ def get_lux():
 
 
 def get_light_sample():
-    global light_filter_count
+    filter_granularity = cfg.filter_granularity["light"]
     intermediate_points = []
-    while len(intermediate_points) < light_filter_count:
+    while len(intermediate_points) < filter_granularity:
         light_level = get_lux()
         intermediate_points.append(light_level)
         intermediate_sampling_rate = get_intermediate_sampling_rate(\
             get_als_sampling_rate\
-            , light_filter_count)
+            , filter_granularity)
         time.sleep(intermediate_sampling_rate)
     return median(intermediate_points)
 
 
 def start_light_sampling():
-    global light_endpoints
+    endpoints = cfg.endpoints["light"]
     while True:
         light_sample = get_light_sample()
-        for url in light_endpoints:
+        for url in endpoints:
             body = {
                 "light": light_sample
             }
@@ -120,7 +100,7 @@ apin = init_temp()
 
 
 def get_temp_sampling_rate():
-    global default_temp_sampling_rate
+    default_temp_sampling_rate = cfg.sampling_rates["temp"]
     celcius = get_deg_c()
     if celcius > 40:
         return 0.2
@@ -143,23 +123,23 @@ def get_deg_c():
 
 
 def get_temp_sample():
-    global temp_filter_count
+    filter_granularity = cfg.filter_granularity["temp"]
     intermediate_points = []
-    while len(intermediate_points) < temp_filter_count:
+    while len(intermediate_points) < filter_granularity:
         temp = get_deg_c()
         intermediate_points.append(temp)
         intermediate_sampling_rate = get_intermediate_sampling_rate( \
             get_temp_sampling_rate \
-            ,temp_filter_count)
+            ,filter_granularity)
         time.sleep(intermediate_sampling_rate)
     return mean(intermediate_points)
 
 
 def start_temp_sampling():
-    global temp_endpoints
+    endpoints = cfg.endpoints["temp"]
     while True:
         temp_sample = get_temp_sample()
-        for url in temp_endpoints:
+        for url in endpoints:
             body = {
                 "temp": temp_sample
             }
