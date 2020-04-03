@@ -15,3 +15,12 @@ sampling_rates = {
     "temp_default": 0.3
 }
 
+pins = {
+    "als_sda": 'P22',
+    "als_scl": 'P21',
+    "temp_sda": 'P16',
+    "temp_scl": 'P19'
+}
+
+
+

@@ -38,7 +38,7 @@ def post(url, body):
 #____________ LIGHT SENSOR CONFIGURATIONS _____________#
 
 
-def init_light(als_sda='P22', als_scl='P21'):
+def init_light(als_sda=cfg.pins["als_sda"], als_scl=cfg.pins["als_scl"]):
     als = LTR329ALS01(sda=als_sda, scl=als_scl)
     return als
 als = init_light()
@@ -88,7 +88,7 @@ def start_light_sampling():
 #__________ TEMP SENSOR CONFIGURATIONS _____________ #
 
 
-def init_temp(temp_sda='P16', temp_scl='P19'):
+def init_temp(temp_sda=cfg.pins["temp_sda"], temp_scl=cfg.pins["temp_scl"]):
     adc = machine.ADC()
     apin = adc.channel(pin=temp_sda)
     power = Pin(temp_scl, mode=Pin.OUT)
