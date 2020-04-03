@@ -8,6 +8,7 @@ import time
 def init_light(als_sda=cfg.pins["als_sda"], als_scl=cfg.pins["als_scl"]):
     als = LTR329ALS01(sda=als_sda, scl=als_scl)
     return als
+    
 als = init_light()
 
 
