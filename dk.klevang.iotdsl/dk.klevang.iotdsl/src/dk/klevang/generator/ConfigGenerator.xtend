@@ -7,11 +7,8 @@ import org.eclipse.xtext.generator.IGeneratorContext
 import dk.klevang.iotdsl.Board
 import dk.klevang.iotdsl.Internet
 import dk.klevang.iotdsl.Sensor
-import java.util.ArrayList
-import dk.klevang.iotdsl.Condition
 import org.eclipse.emf.common.util.EList
 import dk.klevang.iotdsl.Frequency
-import dk.klevang.iotdsl.Pins
 
 class ConfigGenerator extends AbstractGenerator{
 	
@@ -19,10 +16,12 @@ class ConfigGenerator extends AbstractGenerator{
 		resource.allContents.filter(Board).forEach[generateConfigFile(fsa)]
 	}
 	
+	
 	def generateConfigFile(Board board, IFileSystemAccess2 fsa) {
 		fsa.generateFile(board.name + "_config.py", board.generateConfig)
 	
 	}
+	
 	
 	def CharSequence generateConfig(Board board) {
 		'''
@@ -40,6 +39,7 @@ class ConfigGenerator extends AbstractGenerator{
 		
 	}
 	
+	
 	def CharSequence generateInternetConfigs(Internet internet){
 		if(internet !== null) {
 		'''
@@ -50,6 +50,7 @@ class ConfigGenerator extends AbstractGenerator{
 		'''
 		}
 	}
+	
 	
 	def CharSequence generatePins(EList<Sensor> sensors) {
 		'''
@@ -68,6 +69,7 @@ class ConfigGenerator extends AbstractGenerator{
 		'''
 	}
 	
+	
 	def CharSequence generateFilterGranularities(EList<Sensor> sensors) {
 		
 		'''
@@ -81,13 +83,13 @@ class ConfigGenerator extends AbstractGenerator{
 		
 	}
 	
+	
 	def CharSequence addGranularity(Sensor sensor) {
 		'''
 		"«sensor.name»": «sensor.sensorSettings.filter.filterType.value»
 		'''
 		
 	}
-	
 
 	
 	def CharSequence generateSamplingRates(EList<Sensor> sensors) {
@@ -99,6 +101,7 @@ class ConfigGenerator extends AbstractGenerator{
 		«ENDFOR»
 		'''
 	}
+	
 	
 	def CharSequence generateSamplingRates(Sensor sensor) {
 		'''
@@ -113,10 +116,12 @@ class ConfigGenerator extends AbstractGenerator{
 		'''
 	}
 	
+	
 	def double generateFrequency(Frequency frequency) {
 		return calcFrequency(frequency.value, frequency.unit)
 	
 	}
+	
 	
 	def double calcFrequency(int value, String unit) {
 		
