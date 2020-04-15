@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="dk.klevang.iotdsl.ide/src"/>
+	<classpathentry kind="src" path="dk.klevang.iotdsl.tests/xtend-gen"/>
+	<classpathentry kind="src" path="dk.klevang.iotdsl.ui/src"/>
+	<classpathentry kind="src" path="dk.klevang.iotdsl/src"/>
+	<classpathentry kind="src" path="dk.klevang.iotdsl/xtend-gen"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

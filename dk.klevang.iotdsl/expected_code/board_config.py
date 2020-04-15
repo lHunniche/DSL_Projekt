@@ -24,3 +24,26 @@ pins = {
 
 
 
+sampling_rates = [
+	{
+		"rate": 0.5,
+		"condition": 200 
+	},
+	{
+		"rate": 0.2,
+		"condition": 300
+	},
+    {
+		"rate": 0.2,
+		"condition": 100
+	}
+]
+
+default_sampling_rate = 0.5
+
+def select_sampling_rate():
+    measure = 100
+    for sampling_rate in sampling_rates.sort(key=lambda x: x["condition"], reverse=True):
+        if sampling_rate["condition"] > measure:
+            return sampling_rate["rate"]
+    return default_sampling_rate

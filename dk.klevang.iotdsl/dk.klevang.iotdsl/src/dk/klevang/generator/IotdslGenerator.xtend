@@ -4,6 +4,8 @@
 package dk.klevang.generator
 
 import org.eclipse.emf.ecore.resource.Resource
+
+
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
@@ -17,7 +19,11 @@ import dk.klevang.iotdsl.Webserver
  */
 class IotdslGenerator extends AbstractGenerator {
 
+	val configGenerator = new ConfigGenerator
+	
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
+		println("IOT GENERATOR KØRER")
+		configGenerator.doGenerate(resource, fsa, context)
 		resource.allContents.filter(Board).forEach[generateBoardFiles(fsa)]
 		resource.allContents.filter(Webserver).forEach[generateServerFiles(fsa)]
 	}
@@ -32,9 +38,7 @@ class IotdslGenerator extends AbstractGenerator {
 		fsa.generateFile(server.name+".py", server.generateServer)
 	}
 	
-	
-	
-	
+
 	def CharSequence generateServer(Webserver server)
 	{
 	'''

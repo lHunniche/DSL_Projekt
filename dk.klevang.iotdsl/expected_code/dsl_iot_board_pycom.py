@@ -56,6 +56,16 @@ def get_als_sampling_rate():
     else:
         return default_light_sampling_rate
 
+"""
+#TODO: Switch to this method
+def select_sampling_rate():
+    measure = 100
+    for sampling_rate in sampling_rates.sort(key=lambda x: x["condition"], reverse=True):
+        if sampling_rate["condition"] > measure:
+            return sampling_rate["rate"]
+    return default_sampling_rate
+"""
+
 def get_lux():
     global als
     lux = als.light()[0]

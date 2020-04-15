@@ -11,7 +11,11 @@ ProgramElement:
 ;
 
 Board:
-	'board' name=ID '{' (sensors += Sensor)* internet = Internet? '}'
+	'board' name=BoardType '{' (sensors += Sensor)* internet = Internet? '}'
+;
+
+BoardType:
+ 'Pycom' | 'Esp32'
 ;
 	
 Sensor:
@@ -31,8 +35,9 @@ Pins:
 ;
 
 Condition:
-	'when' condition=BooleanExp 'then' 'sampling' '=' frequency = Frequency
+	'when' condition=SimpleComparison 'then' 'sampling' '=' frequency = Frequency
 ;
+
 
 Frequency:
 	{Frequency} value=INT ('Hz' | 'per' unit = Unit);
@@ -45,16 +50,16 @@ Filter:
 	';' 'filtering' '=' filterType = FilterType;
 
 FilterType:
-	'mean' INT | 'median' INT;
+	'mean' value=INT | 'median' value=INT;
 
 Internet: 
-	'internet' '(' ssid = Ssid ';' internetPass = InternetPass ')';
+	'internet' '(' 'ssid' '=' ssid = Ssid ';' 'password' '=' internetPass = InternetPass ')';
 
 InternetPass: 
-	'password' '=' STRING;
+	STRING;
 
 Ssid: 
-	'ssid' '=' STRING;
+	STRING;
 
 EndpointType: 
 	Serial | Webserver
@@ -96,6 +101,9 @@ Host:
 	'host' '=' STRING
 ;
 
+SimpleComparison:
+	'this' op = (">"|"<"|"!="|"==") value=INT
+;
 
 BooleanExp returns BooleanExp:
 	Or
