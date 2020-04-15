@@ -23,12 +23,14 @@ class IotdslGenerator extends AbstractGenerator {
 	val configGenerator = new ConfigGenerator
 	val pycomGenerator = new PycomGenerator
 	val esp32Generator = new Esp32Generator
+	val webserverGenerator = new WebserverGenerator
 	val generatorList = new ArrayList<AbstractGenerator>();
 	
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		generatorList.add(configGenerator)
 		generatorList.add(pycomGenerator)
 		generatorList.add(esp32Generator)
+		generatorList.add(webserverGenerator)
 		generatorList.forEach[doGenerate(resource, fsa, context)]
 	
 		//resource.allContents.filter(Board).forEach[generateBoardFiles(fsa)]

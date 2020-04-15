@@ -17,7 +17,6 @@ class ConfigGenerator extends AbstractGenerator{
 	
 	override doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		resource.allContents.filter(Board).forEach[generateConfigFile(fsa)]
-		println("Jeg kører!!!!!")
 	}
 	
 	def generateConfigFile(Board board, IFileSystemAccess2 fsa) {
@@ -27,16 +26,16 @@ class ConfigGenerator extends AbstractGenerator{
 	
 	def CharSequence generateConfig(Board board) {
 		'''
-			«board.internet.generateInternetConfigs»
-			
-			
-			«board.sensors.generateSamplingRates»
-			
-			
-			«board.sensors.generatePins»
-			
-			
-			«board.sensors.generateFilterGranularities»
+		«board.internet.generateInternetConfigs»
+
+
+		«board.sensors.generatePins»
+		
+		
+		«board.sensors.generateFilterGranularities»
+		
+		
+		«board.sensors.generateSamplingRates»
 		'''
 		
 	}
@@ -49,7 +48,6 @@ class ConfigGenerator extends AbstractGenerator{
 				"passw": «internet.internetPass»
 			}
 		'''
-		
 		}
 	}
 	
