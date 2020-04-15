@@ -28,8 +28,14 @@ class ConfigGenerator extends AbstractGenerator{
 	def CharSequence generateConfig(Board board) {
 		'''
 			«board.internet.generateInternetConfigs»
+			
+			
 			«board.sensors.generateSamplingRates»
+			
+			
 			«board.sensors.generatePins»
+			
+			
 			«board.sensors.generateFilterGranularities»
 		'''
 		
@@ -50,17 +56,17 @@ class ConfigGenerator extends AbstractGenerator{
 	def CharSequence generatePins(EList<Sensor> sensors) {
 		'''
 		pins = {
-		«FOR sensor: sensors»
-					«sensor.addPins»
-		«ENDFOR»
-			}
+			«FOR sensor: sensors»
+			«sensor.addPins»
+			«ENDFOR»
+		}
 		'''
 	}
 	
 	def CharSequence addPins(Sensor sensor) {
 		'''
-				"«sensor.name»_in": 'P«sensor.sensorSettings.pins.pinIn»',
-				"«sensor.name»_out": 'P«sensor.sensorSettings.pins.pinOut»'
+		"«sensor.name»_in": 'P«sensor.sensorSettings.pins.pinIn»',
+		"«sensor.name»_out": 'P«sensor.sensorSettings.pins.pinOut»'
 		'''
 	}
 	
@@ -71,7 +77,7 @@ class ConfigGenerator extends AbstractGenerator{
 			«FOR sensor: sensors SEPARATOR ","»
 			«sensor.addGranularity»
 			«ENDFOR»
-			}
+		}
 		'''
 		
 		
@@ -79,7 +85,7 @@ class ConfigGenerator extends AbstractGenerator{
 	
 	def CharSequence addGranularity(Sensor sensor) {
 		'''
-				"«sensor.name»": «sensor.sensorSettings.filter.filterType.value»
+		"«sensor.name»": «sensor.sensorSettings.filter.filterType.value»
 		'''
 		
 	}
@@ -90,6 +96,8 @@ class ConfigGenerator extends AbstractGenerator{
 		'''
 		«FOR sensor: sensors»
 			«sensor.generateSamplingRates»
+			
+			
 		«ENDFOR»
 		'''
 	}
