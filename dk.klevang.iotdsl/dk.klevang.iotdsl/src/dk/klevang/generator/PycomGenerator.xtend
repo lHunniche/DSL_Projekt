@@ -12,7 +12,7 @@ class PycomGenerator extends AbstractGenerator{
 		resource.allContents.filter(Board).forEach[generateBoardFiles(fsa)]
 	}
 	
-		def generateBoardFiles(Board board, IFileSystemAccess2 access2) 
+	def generateBoardFiles(Board board, IFileSystemAccess2 access2) 
 	{
 		//throw new UnsupportedOperationException("TODO: auto-generated method stub")
 	}

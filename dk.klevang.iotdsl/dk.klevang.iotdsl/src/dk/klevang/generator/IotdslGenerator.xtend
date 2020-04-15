@@ -11,6 +11,7 @@ import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
 import dk.klevang.iotdsl.Board
 import dk.klevang.iotdsl.Webserver
+import java.util.ArrayList
 
 /**
  * Generates code from your model files on save.
@@ -20,12 +21,18 @@ import dk.klevang.iotdsl.Webserver
 class IotdslGenerator extends AbstractGenerator {
 
 	val configGenerator = new ConfigGenerator
+	val pycomGenerator = new PycomGenerator
+	val esp32Generator = new Esp32Generator
+	val generatorList = new ArrayList<AbstractGenerator>();
 	
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		println("IOT GENERATOR KØRER")
-		configGenerator.doGenerate(resource, fsa, context)
-		resource.allContents.filter(Board).forEach[generateBoardFiles(fsa)]
-		resource.allContents.filter(Webserver).forEach[generateServerFiles(fsa)]
+		generatorList.add(configGenerator)
+		generatorList.add(pycomGenerator)
+		generatorList.add(esp32Generator)
+		generatorList.forEach[doGenerate(resource, fsa, context)]
+	
+		//resource.allContents.filter(Board).forEach[generateBoardFiles(fsa)]
+		//resource.allContents.filter(Webserver).forEach[generateServerFiles(fsa)]
 	}
 	
 	def generateBoardFiles(Board board, IFileSystemAccess2 access2) 
