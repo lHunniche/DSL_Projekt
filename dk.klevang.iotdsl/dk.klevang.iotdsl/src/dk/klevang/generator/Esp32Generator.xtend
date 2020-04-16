@@ -9,6 +9,9 @@ class Esp32Generator extends AbstractGenerator{
 	
 	override doGenerate(Resource input, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		//throw new UnsupportedOperationException("TODO: auto-generated method stub")
+		
+		//This is new comment
+		
 	}
 	
 }
