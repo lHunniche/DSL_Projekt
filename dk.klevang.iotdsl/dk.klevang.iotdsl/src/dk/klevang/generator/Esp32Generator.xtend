@@ -101,16 +101,15 @@ class Esp32Generator extends AbstractGenerator{
 	{
 		switch sensor.sensorType {
 			Light: sensor.initLight
-			Temp: println("abe")
-			Barometer: println("abe")
-			Pier: println("abe")
-			Accelerometer: println("abe")
-			Humidity: println("abe")
+			Temp: sensor.initTemp
+			Barometer: sensor.initBarometer
+			Pier: sensor.initPier
+			Accelerometer: sensor.initAccelerometer
+			Humidity: sensor.initHumidity
 		}
 	}
 	
 
-	
 	def CharSequence initLight(Sensor sensor)	
 	{	
 	'''
@@ -119,18 +118,73 @@ class Esp32Generator extends AbstractGenerator{
 	als = BH1750(I2C(sda=als_sda,scl=als_scl)) 
 	  return als
 	  
-	
-	  «sensor.getAlsSamplingRate»
-	  «sensor.getLux»
-	  «sensor.lightSample»
-	  «sensor.startLightSampling»
+	def get_lux():
+	  	lux = round(sensor.luminance(BH1750.ONCE_HIRES_1))
+	  	return lux
+	  	  
+	  «sensor.getSamplingRate»
+	  
+	  «sensor.generateSampleFunction»
 	'''
 	
+	}
+	def CharSequence initTemp(Sensor sensor)
+	{
+	'''
+	def init_temp(temp_sda = «sensor.sensorSettings.pins.pinOut», temp_scl = «sensor.sensorSettings.pins.pinIn»)
+	  adc = machine.ADC()  
+	  adc.atten(ADC.ATTN_6DB)
+		adc.width(ADC.WIDTH_12BIT)
+	  apin = adc.channel(pin=temp_sda) 
+	  power = Pin(temp_scl, mode=Pin.OUT)
+	  power.value(1)
+	  return apin 
+	apin = init_temp()
 	
+	def get_celcius_from_mv(mv):
+	  voltage_conversion=((mv*2)/4096)
+	  return ((voltage_conversion-0.5)/0.01)
 	
+	def get_deg_c():
+	  mv = apin.read()
+	  deg_c = get_celcius_from_mv(mv)
+	  return deg_c
+	
+	«sensor.getSamplingRate»
+	
+	«sensor.generateSampleFunction»
+	'''
 	}
 	
-	def CharSequence getAlsSamplingRate(Sensor sensor)
+	def CharSequence initBarometer(Sensor sensor)
+	{
+		'''
+		 NOT YET SUPPORTED
+		'''
+	}
+	
+	def CharSequence initPier(Sensor sensor)
+	{
+		'''
+		 NOT YET SUPPORTED
+		'''
+	}
+	
+	def CharSequence initHumidity(Sensor sensor)
+	{
+		'''
+		 NOT YET SUPPORTED
+		'''
+	}
+	
+	def CharSequence initAccelerometer(Sensor sensor)
+	{
+		'''
+		 NOT YET SUPPORTED
+		'''
+	}
+	
+	def CharSequence getSamplingRate(Sensor sensor)
 	{
 	var first = sensor.conditions.get(0)
 	'''
@@ -150,30 +204,6 @@ class Esp32Generator extends AbstractGenerator{
 	'''
 	}
 	
-	def CharSequence getLux(Sensor sensor)
-	{
-	'''	
-	
-	def get_lux():
-	  lux = round(sensor.luminance(BH1750.ONCE_HIRES_1))
-	  return lux
-	'''
-	}
-	
-	def getLightSample(Sensor sensor)
-	{
-	'''
-	def get_light_sample():
-		global light_filter_count
-		intermediate_points = []
-		while len(intermediate_points) < light_filter_count:
-			light_level = get_lux()
-			intermediate_points.append(light_level)
-			time.sleep(get_als_sampling_rate())
-			sorted(intermediate_points)
-		return intermediate_points[len(intermediate_points)/2]
-	'''
-	}	
 	
 	def CharSequence mean (Sensor sensor)
 	{
@@ -188,17 +218,94 @@ class Esp32Generator extends AbstractGenerator{
 	'''	
 	} 
 	
-	def CharSequence startLightSampling(Sensor sensor)
+	
+	def CharSequence generateSampleFunction(Sensor sensor)
+	{
+		switch sensor.sensorType {
+			Light: sensor.LightSampleFunction
+			Temp: sensor.TempSampleFunction
+			Barometer: sensor.BarometerSampleFunction
+			Pier: sensor.PierSampleFunction
+			Accelerometer: sensor.AccelerometerSampleFunction
+			Humidity: sensor.HumiditySampleFunction
+		}
+	}
+	
+	def CharSequence LightSampleFunction(Sensor sensor)	
 	{
 	'''
+	def get_light_sample():
+		global light_filter_count
+		intermediate_points = []
+		while len(intermediate_points) < light_filter_count:
+			light_level = get_lux()
+			intermediate_points.append(light_level)
+			time.sleep(get_als_sampling_rate())
+			sorted(intermediate_points)
+		return intermediate_points[len(intermediate_points)/2]
+		
 	def start_light_sampling():
-		while True:
-			light_sample = get_light_sample()
-		   	for url in light_endpoints:
-		      body = {
-		        "light": light_sample
-		      }
-		      post(url, body)
+			while True:
+				light_sample = get_light_sample()
+			   	for url in light_endpoints:
+			      body = {
+			        "light": light_sample
+			      }
+			      post(url, body)
 	'''
 	}
+	
+	def CharSequence TempSampleFunction(Sensor sensor)	
+	{
+	'''
+	def get_temp_sample():
+	  global temp_filter_count
+	  intermediate_points = []
+	  while len(intermediate_points) < temp_filter_count:
+	    temp_level = get_deg_c()
+	    intermediate_points.append(temp_level)
+	    time.sleep(get_temp_sampling_rate())
+	  return sum(intermediate_points)/len(intermediate_points)
+	
+	def start_temp_sampling():
+	  global temp_endpoints
+	  while True:
+	    temp_sample = get_temp_sample()
+	    for url in temp_endpoints:
+	      body = {
+	        "temp": temp_sample
+	      }
+	      post(url, body)	 
+	'''
+	}
+	
+	def CharSequence BarometerSampleFunction(Sensor sensor)	
+	{
+		'''
+		 NOT YET SUPPORTED
+		'''
+	}
+	
+	def CharSequence PierSampleFunction(Sensor sensor)	
+	{
+		'''
+		 NOT YET SUPPORTED
+		'''
+	}
+	
+	def CharSequence AccelerometerSampleFunction(Sensor sensor)	
+	{
+		'''
+		 NOT YET SUPPORTED
+		'''
+	}
+	
+	def CharSequence HumiditySampleFunction(Sensor sensor)	
+	{
+		'''
+		 NOT YET SUPPORTED
+		'''
+	}
+
+	
 }
