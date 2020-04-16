@@ -22,7 +22,10 @@ class PycomGenerator extends AbstractGenerator{
 	
 	def generateBoardFiles(Board board, IFileSystemAccess2 fsa) 
 	{
-		fsa.generateFile(board.name + "_" + board.boardType + ".py", board.generateFileContent)
+		if (board.boardType == "Pycom")
+		{
+			fsa.generateFile(board.name + "_" + board.boardType + ".py", board.generateFileContent)
+		}
 	}
 	
 	def CharSequence generateFileContent(Board board)
@@ -108,21 +111,160 @@ class PycomGenerator extends AbstractGenerator{
 		switch sensor.sensorType {
 			Light: sensor.initLight
 			Temp: sensor.initTemp
-			Barometer: println("abe")
-			Pier: println("abe")
-			Accelerometer: println("abe")
-			Humidity: println("abe")
+			Barometer: sensor.initBarometer
+			Pier: sensor.initPier
+			Accelerometer: sensor.initAccelerometer 
+			Humidity: sensor.initHumidity
 		}
 	}
 	
+	def CharSequence generateSampling(Sensor sensor)
+	{
+		'''
+		# This is the method that selects the appropriate sample rate for your «sensor.name»
+		def select_«sensor.name»_sampling_rate():
+		    measure = sample_from_«sensor.name»()
+		    for sampling_rate in cfg.«sensor.name»_sampling_rates.sort(key=lambda x: x["condition"], reverse=True):
+		        if sampling_rate["condition"] > measure:
+		            return sampling_rate["rate"]
+		    return cfg.default_sampling_rate
+		    
+		    
+		'''
+	}
+	
+	
 	def CharSequence initLight(Sensor sensor)
+	{
+		'''
+		# This method initialises the Light sensor on your PyCom device
+		def init_light(als_sda=cfg.pins["«sensor.name»_in"], als_scl=cfg.pins["«sensor.name»_out"]):
+		    als = LTR329ALS01(sda=als_sda, scl=als_scl)
+		    return als
+		    
+		als = init_light()
+		
+		
+		«sensor.generateSampling»
+		
+		
+		«sensor.generateSampleFunction»
+		'''
+	}
+	
+	def CharSequence generateSampleFunction(Sensor sensor)
+	{
+		switch sensor.sensorType {
+			Light: sensor.generateLightSampleFunction
+			Temp: sensor.generateTempSampleFunction
+			Barometer: sensor.generateBarometerSampleFunction
+			Pier: sensor.generatePierSampleFunction
+			Accelerometer: sensor.generateAccelerometerSampleFunction
+			Humidity: sensor.generateHumiditySampleFunction
+		}
+	}
+	
+	def CharSequence generateLightSampleFunction(Sensor sensor)
+	{
+		'''
+		def sample_from_«sensor.name»(sample_config="mean"):
+			if sample_config == "mean":
+				return (als.light()[0] + als.light()[1]) / 2
+			elif sample_config == "max":
+				return max(als.light())
+			elif sample_config == "min"
+				return min(als.light())
+			else:
+				# return list of measurements
+				return als.light()
+		'''
+	}
+	
+	def CharSequence generateTempSampleFunction(Sensor sensor)
+	{
+		
+	}
+	
+	def CharSequence generateHumiditySampleFunction(Sensor sensor)
+	{
+		'''
+		HUMIDITY NOT YET SUPPORTED, SORRY
+		'''
+	}
+	
+	def CharSequence generatePierSampleFunction(Sensor sensor)
+	{
+		'''
+		PIER NOT YET SUPPORTED, SORRY
+		'''
+	}
+	
+	def CharSequence generateAccelerometerSampleFunction(Sensor sensor)
+	{
+		'''
+		ACCELEROMETER NOT YET SUPPORTED, SORRY
+		'''
+	}
+	
+	def CharSequence generateBarometerSampleFunction(Sensor sensor)
+	{
+		'''
+		BAROMETER NOT YET SUPPORTED, SORRY
+		'''
+	}
+	
+	def CharSequence somemethod(Board board)
 	{
 		
 	}
 	
 	def CharSequence initTemp(Sensor sensor)
 	{
+		'''
+		# This method initialises the Temperature sensor on your PyCom device
+		def init_temp(temp_sda=cfg.pins["«sensor.name»_in"], temp_scl=cfg.pins["«sensor.name»_out"]):
+		    adc = machine.ADC()
+		    apin = adc.channel(pin=temp_sda)
+		    power = Pin(temp_scl, mode=Pin.OUT)
+		    power.value(1)
+		    return apin
 		
+		apin = init_temp()
+		
+		«sensor.generateSampling»
+		'''
+	}
+	
+	
+	def CharSequence initBarometer(Sensor sensor)
+	{
+		'''
+		BAROMETER NOT YET SUPPORTED, SORRY
+		'''
+	}
+	
+	
+	def CharSequence initPier(Sensor sensor)
+	{
+		'''
+		PIER NOT YET SUPPORTED, SORRY
+		'''
+	}
+	
+	
+	def CharSequence initAccelerometer(Sensor sensor)
+	{
+		'''
+		ACCELEROMETER NOT YET SUPPORTED, SORRY
+		'''
+	}
+	
+	
+	def CharSequence initHumidity(Sensor sensor)
+	{
+		'''
+		HUMIDITY NOT YET SUPPORTED, SORRY
+		'''
 	}
 	
 	

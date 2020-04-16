@@ -96,16 +96,15 @@ class ConfigGenerator extends AbstractGenerator{
 		'''
 		«FOR sensor: sensors»
 			«sensor.generateSamplingRates»
-			
-			
 		«ENDFOR»
+		default_sampling_rate = 0.5
 		'''
 	}
 	
 	
 	def CharSequence generateSamplingRates(Sensor sensor) {
 		'''
-		sampling_rates_«sensor.name»_«sensor.sensorType» = [
+		sampling_rates_«sensor.name» = [
 			«FOR condition: sensor.conditions SEPARATOR ","»
 			{
 				"condition": «condition.condition.value»,
