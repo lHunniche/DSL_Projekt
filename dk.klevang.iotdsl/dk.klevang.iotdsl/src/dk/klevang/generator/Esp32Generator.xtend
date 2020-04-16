@@ -33,6 +33,13 @@ class Esp32Generator extends AbstractGenerator{
 		«board.generateImports»
 		«board.generateInternetConnection»
 		«board.sensors.generateInitSensors»
+		
+		
+		def init_sensors():
+		«FOR sensor : board.sensors»
+		_thread.start_new_thread(«sensor.name»)
+		«ENDFOR»
+		
 		'''
 	}
 	
