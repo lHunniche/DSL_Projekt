@@ -125,7 +125,6 @@ def get_temp_sampling_rate():
 def get_celcius_from_mv(mv):
     return (mv - 500.0) / 10.0
 
-
 def get_deg_c():
     mv = apin.voltage()
     deg_c = get_celcius_from_mv(mv)
