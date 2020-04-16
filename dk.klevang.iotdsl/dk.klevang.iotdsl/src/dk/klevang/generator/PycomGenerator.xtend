@@ -13,6 +13,7 @@ import dk.klevang.iotdsl.Barometer
 import dk.klevang.iotdsl.Pier
 import dk.klevang.iotdsl.Accelerometer
 import dk.klevang.iotdsl.Humidity
+import dk.klevang.iotdsl.FilterType
 
 class PycomGenerator extends AbstractGenerator{
 	
@@ -34,7 +35,48 @@ class PycomGenerator extends AbstractGenerator{
 		«board.generateImports»
 		«board.generateInternetConnection»
 		«board.sensors.generateInitSensors»
+		«board.eAllContents.filter(FilterType).map[FilterType f | f.type].toSet.forEach[generateFilterFunction]»
+		«generateIntermediateSampleFunction»
+		
 		'''
+	}
+	
+	def CharSequence generateIntermediateSampleFunction() {
+		
+		'''
+		def get_intermediate_sampling_rate(sample_rate_function, count):
+			sampling_rate = sample_rate_function()
+			seconds = 1/sampling_rate
+			intermediate_sampling_rate = seconds/count
+			return intermediate_sampling_rate
+		'''
+	}
+	
+	def CharSequence generateFilterFunction(String filterType)
+	{
+		//println("CREATE " + filterType + " function")
+		'''
+		FUCKING ANYTHING?
+		'''
+		/*
+		«IF filterType == "mean"»
+			def mean(intermediate_points):
+				return sum(intermediate_points)/len(intermediate_points)
+				
+				
+		«ELSEIF filterType == "median"»
+			def median(intermediate_points):
+			    sorted(intermediate_points)
+			    index = int(len(intermediate_points)/2)
+			    return intermediate_points[index]
+			    
+			    
+		«ELSE»
+			#Filter types go here
+		«ENDIF»
+		'''
+		  */
+	
 	}
 	
 	def CharSequence generateImports(Board board)
@@ -86,10 +128,9 @@ class PycomGenerator extends AbstractGenerator{
 			            break
 			 
 			 
-			 def post(url, body):
-			 			    res = urequests.post(url, headers={
-			 			                         "Content-Type": "application/json", "Accept": "application/json"}, json=body)
-			 			    res.close()
+			def post(url, body):
+				res = urequests.post(url, headers={"Content-Type": "application/json", "Accept": "application/json"}, json=body)
+				res.close()
 			
 			
 			'''
@@ -167,16 +208,9 @@ class PycomGenerator extends AbstractGenerator{
 	def CharSequence generateLightSampleFunction(Sensor sensor)
 	{
 		'''
-		def sample_from_«sensor.name»(sample_config="mean"):
-			if sample_config == "mean":
-				return (als.light()[0] + als.light()[1]) / 2
-			elif sample_config == "max":
-				return max(als.light())
-			elif sample_config == "min"
-				return min(als.light())
-			else:
-				# return list of measurements
-				return als.light()
+		def sample_from_«sensor.name»():
+			light = als.light()[0]
+			
 		'''
 	}
 	

@@ -54,7 +54,7 @@ Filter:
 	';' 'filtering' '=' filterType = FilterType;
 
 FilterType:
-	'mean' value=INT | 'median' value=INT;
+	type='mean' value=INT | type='median' value=INT;
 
 Internet: 
 	'internet' '(' 'ssid' '=' ssid = Ssid ';' 'password' '=' internetPass = InternetPass ')';

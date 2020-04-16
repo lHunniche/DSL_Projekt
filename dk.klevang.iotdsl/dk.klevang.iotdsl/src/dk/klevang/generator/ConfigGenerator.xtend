@@ -55,7 +55,7 @@ class ConfigGenerator extends AbstractGenerator{
 	def CharSequence generatePins(EList<Sensor> sensors) {
 		'''
 		pins = {
-			«FOR sensor: sensors»
+			«FOR sensor: sensors SEPARATOR ","»
 			«sensor.addPins»
 			«ENDFOR»
 		}
