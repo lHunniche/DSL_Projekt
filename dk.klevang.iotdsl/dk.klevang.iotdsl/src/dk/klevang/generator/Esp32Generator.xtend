@@ -39,6 +39,7 @@ class Esp32Generator extends AbstractGenerator{
 	def CharSequence generateImports(Board board)
 	{
 		'''
+		
 		«IF board.internet !== null»
 		from network import WLAN
 		import urequests
@@ -48,7 +49,7 @@ class Esp32Generator extends AbstractGenerator{
 		from machine import Pin
 		import time
 		from bh1750 import BH1750 #NEEDS TO BE ON THE BOARD https://github.com/PinkInk/upylib/tree/master/bh1750
-		
+	
 		import «board.name»_«board.boardType»_config as cfg
 		import _thread		
 		'''
@@ -63,6 +64,7 @@ class Esp32Generator extends AbstractGenerator{
 		else
 		{
 			'''
+
 			def connect():
 			    passw = cfg.internet["passw"]
 			    ssid = cfg.internet["ssid"]
@@ -99,7 +101,7 @@ class Esp32Generator extends AbstractGenerator{
 	{
 		switch sensor.sensorType {
 			Light: sensor.initLight
-			Temp: sensor.initTemp
+			Temp: println("abe")
 			Barometer: println("abe")
 			Pier: println("abe")
 			Accelerometer: println("abe")
@@ -107,14 +109,96 @@ class Esp32Generator extends AbstractGenerator{
 		}
 	}
 	
-	def CharSequence initLight(Sensor sensor)
-	{
-		
+
+	
+	def CharSequence initLight(Sensor sensor)	
+	{	
+	'''
+	
+	def init_light(als_sda = «sensor.sensorSettings.pins.pinOut», als_scl = «sensor.sensorSettings.pins.pinIn»)
+	als = BH1750(I2C(sda=als_sda,scl=als_scl)) 
+	  return als
+	  
+	
+	  «sensor.getAlsSamplingRate»
+	  «sensor.getLux»
+	  «sensor.lightSample»
+	  «sensor.startLightSampling»
+	'''
+	
+	
+	
 	}
 	
-	def CharSequence initTemp(Sensor sensor)
+	def CharSequence getAlsSamplingRate(Sensor sensor)
 	{
-		
+	var first = sensor.conditions.get(0)
+	'''
+	
+	var first = sensor.conditions.get(0)
+	def get_als_sampling_rate():
+	  global als
+	  
+	   if als.light() «first.condition.op» «first.condition.value» :
+	   		return «first.frequency.value»
+	«FOR c: sensor.conditions»
+	«IF c.condition != first.condition»
+	 elif als.light() «c.condition.op» «c.condition.value» :
+	 	    return «c.frequency.value»	
+	«ENDIF» 
+	«ENDFOR»
+	'''
 	}
 	
+	def CharSequence getLux(Sensor sensor)
+	{
+	'''	
+	
+	def get_lux():
+	  lux = round(sensor.luminance(BH1750.ONCE_HIRES_1))
+	  return lux
+	'''
+	}
+	
+	def getLightSample(Sensor sensor)
+	{
+	'''
+	def get_light_sample():
+		global light_filter_count
+		intermediate_points = []
+		while len(intermediate_points) < light_filter_count:
+			light_level = get_lux()
+			intermediate_points.append(light_level)
+			time.sleep(get_als_sampling_rate())
+			sorted(intermediate_points)
+		return intermediate_points[len(intermediate_points)/2]
+	'''
+	}	
+	
+	def CharSequence mean (Sensor sensor)
+	{
+	'''
+	def mean(sample_list, span):
+		  start = sample_list.length() - span
+		  collected = 0.0
+		  for i in range(start, sample_list.length()):
+		    collected =+ sample_list[i]
+		  return collected / span
+	
+	'''	
+	} 
+	
+	def CharSequence startLightSampling(Sensor sensor)
+	{
+	'''
+	def start_light_sampling():
+		while True:
+			light_sample = get_light_sample()
+		   	for url in light_endpoints:
+		      body = {
+		        "light": light_sample
+		      }
+		      post(url, body)
+	'''
+	}
 }
