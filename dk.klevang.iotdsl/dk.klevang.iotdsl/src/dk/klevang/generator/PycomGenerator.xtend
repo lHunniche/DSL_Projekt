@@ -7,6 +7,12 @@ import org.eclipse.xtext.generator.IGeneratorContext
 import dk.klevang.iotdsl.Board
 import org.eclipse.emf.common.util.EList
 import dk.klevang.iotdsl.Sensor
+import dk.klevang.iotdsl.Light
+import dk.klevang.iotdsl.Temp
+import dk.klevang.iotdsl.Barometer
+import dk.klevang.iotdsl.Pier
+import dk.klevang.iotdsl.Accelerometer
+import dk.klevang.iotdsl.Humidity
 
 class PycomGenerator extends AbstractGenerator{
 	
@@ -100,8 +106,23 @@ class PycomGenerator extends AbstractGenerator{
 	def CharSequence initSensor(Sensor sensor)
 	{
 		switch sensor.sensorType {
-			'light': 
+			Light: sensor.initLight
+			Temp: sensor.initTemp
+			Barometer: println("abe")
+			Pier: println("abe")
+			Accelerometer: println("abe")
+			Humidity: println("abe")
 		}
+	}
+	
+	def CharSequence initLight(Sensor sensor)
+	{
+		
+	}
+	
+	def CharSequence initTemp(Sensor sensor)
+	{
+		
 	}
 	
 	
