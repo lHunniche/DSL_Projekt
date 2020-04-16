@@ -11,7 +11,7 @@ ProgramElement:
 ;
 
 Board:
-	'board' name=BoardType '{' (sensors += Sensor)* internet = Internet? '}'
+	'board' boardType=BoardType name=ID '{' (sensors += Sensor)* internet = Internet? '}'
 ;
 
 BoardType:
@@ -19,11 +19,15 @@ BoardType:
 ;
 	
 Sensor:
-	{Sensor} 'sensor' name=ID sensorSettings = SensorSettings 
+	{Sensor} 'sensor' sensorType=SensorType name=ID sensorSettings = SensorSettings 
 	'{' 
 	(conditions += Condition)* 
 	'endpoints' '=' (endpoints += [EndpointType])+
 	'}'
+;
+
+SensorType:
+	{Light} 'light' | {Temp} 'temp' | {Humidity} 'humidity' | {Barometer} 'barometer' | {Pier} 'pier' | {Accelerometer} 'accelerometer'
 ;
 
 SensorSettings:

@@ -12,6 +12,8 @@ class Esp32Generator extends AbstractGenerator{
 		
 		//This is new comment
 		//This is another new comment
+		
+		// hallihalløj
 	}
 	
 }

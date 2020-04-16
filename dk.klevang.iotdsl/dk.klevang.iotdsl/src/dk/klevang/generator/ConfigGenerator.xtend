@@ -18,7 +18,7 @@ class ConfigGenerator extends AbstractGenerator{
 	
 	
 	def generateConfigFile(Board board, IFileSystemAccess2 fsa) {
-		fsa.generateFile(board.name + "_config.py", board.generateConfig)
+		fsa.generateFile(board.name + "_" + board.boardType + "_config.py", board.generateConfig)
 	
 	}
 	
@@ -105,7 +105,7 @@ class ConfigGenerator extends AbstractGenerator{
 	
 	def CharSequence generateSamplingRates(Sensor sensor) {
 		'''
-		sampling_rates_«sensor.name» = [
+		sampling_rates_«sensor.name»_«sensor.sensorType» = [
 			«FOR condition: sensor.conditions SEPARATOR ","»
 			{
 				"condition": «condition.condition.value»,
