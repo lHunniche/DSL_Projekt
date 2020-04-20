@@ -36,30 +36,35 @@ class Esp32Generator extends AbstractGenerator{
 		
 		
 		def init_sensors():
-		«FOR sensor : board.sensors»
-		_thread.start_new_thread(«sensor.name»)
-		«ENDFOR»
+			«FOR sensor : board.sensors»
+			_thread.start_new_thread(start_«sensor.name»_sampling)
+			«ENDFOR»
 		
+		def run():
+			connect()
+			init_sensors()
+		
+		if __name__ == "main":
+			run()
 		'''
 	}
 	
 	def CharSequence generateImports(Board board)
 	{
-		'''
-		
-		«IF board.internet !== null»
-		from network import WLAN
-		import urequests
-		«ENDIF»
-		
-		import machine
-		from machine import Pin
-		import time
-		from bh1750 import BH1750 #NEEDS TO BE ON THE BOARD https://github.com/PinkInk/upylib/tree/master/bh1750
+	'''
+	«IF board.internet !== null»
+	from network import WLAN
+	import urequests
+	«ENDIF»
 	
-		import «board.name»_«board.boardType»_config as cfg
-		import _thread		
-		'''
+	import machine
+	from machine import Pin
+	import time
+	from bh1750 import BH1750 #NEEDS TO BE ON THE BOARD https://github.com/PinkInk/upylib/tree/master/bh1750
+	
+	import «board.name»_«board.boardType»_config as cfg
+	import _thread
+	'''
 	}
 	
 	def CharSequence generateInternetConnection(Board board)
@@ -121,41 +126,43 @@ class Esp32Generator extends AbstractGenerator{
 	{	
 	'''
 	
-	def init_light(als_sda = «sensor.sensorSettings.pins.pinOut», als_scl = «sensor.sensorSettings.pins.pinIn»)
-	als = BH1750(I2C(sda=als_sda,scl=als_scl)) 
-	  return als
-	  
+	def init_light(als_sda = «sensor.sensorSettings.pins.pinOut», als_scl = «sensor.sensorSettings.pins.pinIn»):
+		als = BH1750(I2C(sda=als_sda,scl=als_scl)) 
+		return als
+	
 	def get_lux():
-	  	lux = round(sensor.luminance(BH1750.ONCE_HIRES_1))
-	  	return lux
-	  	  
-	  «sensor.getSamplingRate»
-	  
-	  «sensor.generateSampleFunction»
+		lux = round(sensor.luminance(BH1750.ONCE_HIRES_1))
+		return lux
+	
+	«sensor.getSamplingRate»
+	
+	«sensor.generateSampleFunction»
 	'''
 	
 	}
 	def CharSequence initTemp(Sensor sensor)
 	{
 	'''
-	def init_temp(temp_sda = «sensor.sensorSettings.pins.pinOut», temp_scl = «sensor.sensorSettings.pins.pinIn»)
-	  adc = machine.ADC()  
-	  adc.atten(ADC.ATTN_6DB)
+	
+	def init_temp(temp_sda = «sensor.sensorSettings.pins.pinOut», temp_scl = «sensor.sensorSettings.pins.pinIn»):
+		adc = machine.ADC()  
+		adc.atten(ADC.ATTN_6DB)
 		adc.width(ADC.WIDTH_12BIT)
-	  apin = adc.channel(pin=temp_sda) 
-	  power = Pin(temp_scl, mode=Pin.OUT)
-	  power.value(1)
-	  return apin 
+		apin = adc.channel(pin=temp_sda) 
+		power = Pin(temp_scl, mode=Pin.OUT)
+		power.value(1)
+		return apin
+		
 	apin = init_temp()
 	
 	def get_celcius_from_mv(mv):
-	  voltage_conversion=((mv*2)/4096)
-	  return ((voltage_conversion-0.5)/0.01)
+		voltage_conversion=((mv*2)/4096)
+		return ((voltage_conversion-0.5)/0.01)
 	
 	def get_deg_c():
-	  mv = apin.read()
-	  deg_c = get_celcius_from_mv(mv)
-	  return deg_c
+		mv = apin.read()
+		deg_c = get_celcius_from_mv(mv)
+		return deg_c
 	
 	«sensor.getSamplingRate»
 	
@@ -196,18 +203,17 @@ class Esp32Generator extends AbstractGenerator{
 	var first = sensor.conditions.get(0)
 	'''
 	
-	var first = sensor.conditions.get(0)
 	def get_als_sampling_rate():
-	  global als
-	  
-	   if als.light() «first.condition.op» «first.condition.value» :
-	   		return «first.frequency.value»
-	«FOR c: sensor.conditions»
-	«IF c.condition != first.condition»
-	 elif als.light() «c.condition.op» «c.condition.value» :
-	 	    return «c.frequency.value»	
-	«ENDIF» 
-	«ENDFOR»
+		global als
+	
+		if als.light() «first.condition.op» «first.condition.value» :
+			return «first.frequency.value»
+		«FOR c: sensor.conditions»
+		«IF c.condition != first.condition»
+		elif als.light() «c.condition.op» «c.condition.value» :
+			return «c.frequency.value»	
+		«ENDIF» 
+		«ENDFOR»
 	'''
 	}
 	
@@ -216,11 +222,11 @@ class Esp32Generator extends AbstractGenerator{
 	{
 	'''
 	def mean(sample_list, span):
-		  start = sample_list.length() - span
-		  collected = 0.0
-		  for i in range(start, sample_list.length()):
-		    collected =+ sample_list[i]
-		  return collected / span
+		start = sample_list.length() - span
+		collected = 0.0
+		for i in range(start, sample_list.length()):
+			collected =+ sample_list[i]
+		return collected / span
 	
 	'''	
 	} 
@@ -250,15 +256,15 @@ class Esp32Generator extends AbstractGenerator{
 			time.sleep(get_als_sampling_rate())
 			sorted(intermediate_points)
 		return intermediate_points[len(intermediate_points)/2]
-		
+	
 	def start_light_sampling():
-			while True:
-				light_sample = get_light_sample()
-			   	for url in light_endpoints:
-			      body = {
-			        "light": light_sample
-			      }
-			      post(url, body)
+		while True:
+			light_sample = get_light_sample()
+			for url in light_endpoints:
+				body = {
+					"light": light_sample
+				}
+				post(url, body)
 	'''
 	}
 	
@@ -266,23 +272,23 @@ class Esp32Generator extends AbstractGenerator{
 	{
 	'''
 	def get_temp_sample():
-	  global temp_filter_count
-	  intermediate_points = []
-	  while len(intermediate_points) < temp_filter_count:
-	    temp_level = get_deg_c()
-	    intermediate_points.append(temp_level)
-	    time.sleep(get_temp_sampling_rate())
-	  return sum(intermediate_points)/len(intermediate_points)
+		global temp_filter_count
+		intermediate_points = []
+		while len(intermediate_points) < temp_filter_count:
+			temp_level = get_deg_c()
+			intermediate_points.append(temp_level)
+			time.sleep(get_temp_sampling_rate())
+		return sum(intermediate_points)/len(intermediate_points)
 	
-	def start_temp_sampling():
-	  global temp_endpoints
-	  while True:
-	    temp_sample = get_temp_sample()
-	    for url in temp_endpoints:
-	      body = {
-	        "temp": temp_sample
-	      }
-	      post(url, body)	 
+	def start_«sensor.name»_sampling():
+		global temp_endpoints
+		while True:
+			temp_sample = get_temp_sample()
+			for url in temp_endpoints:
+				body = {
+					"temp": temp_sample
+				}
+				post(url, body)	 
 	'''
 	}
 	
