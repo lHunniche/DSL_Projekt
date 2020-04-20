@@ -31,15 +31,13 @@ public class IotdslScopeProvider extends AbstractIotdslScopeProvider {
 		System.out.println("\n");
 	    // We want to define the Scope for the Element's superElement cross-reference
 	    if (context instanceof DotReference) {
+	    	//System.out.println("Web: " + ((DotReference) context).getWeb());
+	    	//System.out.println("Endpoint: " + ((DotReference) context).getEndpoint());
 	        // Collect a list of candidates by going through the model
 	        // EcoreUtil2 provides useful functionality to do that
 	        // For example searching for all elements within the root Object's tree
 	        EObject rootElement = EcoreUtil2.getRootContainer(context);
 	        List<WebEndpoint> candidates = EcoreUtil2.getAllContentsOfType(rootElement, WebEndpoint.class);
-	        for (WebEndpoint we : candidates)
-	        {
-	        	System.out.println(we.getName());
-	        }
 	        // Create IEObjectDescriptions and puts them into an IScope instance
 	        return Scopes.scopeFor(candidates);
 	    }
