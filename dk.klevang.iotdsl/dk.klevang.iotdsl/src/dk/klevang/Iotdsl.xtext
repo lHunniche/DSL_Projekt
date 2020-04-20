@@ -7,7 +7,7 @@ Program:
 ;
 
 ProgramElement:
-	Board | EndpointType
+	Board | Serial | Webserver
 ;
 
 Board:
@@ -22,8 +22,16 @@ Sensor:
 	{Sensor} 'sensor' sensorType=SensorType name=ID sensorSettings = SensorSettings 
 	'{' 
 	(conditions += Condition)* 
-	'endpoints' '=' (endpoints += [EndpointType])+
+	'endpoints' '=' (endpoints += EndpointRef)+
 	'}'
+;
+
+EndpointRef:
+	ref = [Serial] | dot = DotReference
+;
+
+DotReference:
+	web = [Webserver] '.' endpoint = [WebEndpoint]
 ;
 
 SensorType:
@@ -65,10 +73,6 @@ InternetPass:
 Ssid: 
 	STRING;
 
-EndpointType: 
-	Serial | Webserver
-;
-
 Serial:
 	'serial' name=ID '(' serialPort = SerialPort (';' baud = Baud)? ';' output = Output ')'
 ;
@@ -78,7 +82,7 @@ Webserver:
 ;
 
 WebEndpoint:
-	STRING (';' STRING)*
+	name = ID
 ;
 
 WebPort:

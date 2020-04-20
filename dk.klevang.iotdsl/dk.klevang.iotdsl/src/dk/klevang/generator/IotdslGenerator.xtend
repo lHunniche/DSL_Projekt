@@ -55,9 +55,6 @@ class IotdslGenerator extends AbstractGenerator {
 	app = Flask(__name__)
 
 
-	«FOR endpoint: server.getWebEndpoint.split(";")»
-		«endpoint.generateEndpoint»
-	«ENDFOR»
 	
 	«server.generateRun»
 	'''
