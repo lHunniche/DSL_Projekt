@@ -54,7 +54,7 @@ class WebserverGenerator extends AbstractGenerator {
 	def CharSequence generateRun(Webserver server)
 	{
 	'''
-	if __name__ == "main":
+	if __name__ == "__main__":
 		app.run(debug=True, host='0.0.0.0', port=«server.getWebPort.getPort», threaded=False)
 		
 	'''	
