@@ -219,10 +219,11 @@ class PycomGenerator extends AbstractGenerator{
 		# This is the method that selects the appropriate sample rate for your «sensor.name»
 		def select_«sensor.name»_sampling_rate():
 			measure = single_measurement_from_«sensor.name»()
-			for sampling_rate in cfg.sampling_rates_«sensor.name».sort(key=lambda x: x["condition"], reverse=True):
-				if sampling_rate["condition"] > measure:
+			cfg.sampling_rates_«sensor.name».sort(key=lambda x: x["condition"], reverse=True)
+			for sampling_rate in cfg.sampling_rates_«sensor.name»:
+				if sampling_rate["condition"] < measure:
 					return sampling_rate["rate"]
-				return cfg.default_sampling_rate
+			return cfg.default_sampling_rate
 		    
 		«sensor.generateSingleMeasurement»
 		    
