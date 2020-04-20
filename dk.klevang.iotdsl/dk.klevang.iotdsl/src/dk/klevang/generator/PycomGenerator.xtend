@@ -218,15 +218,41 @@ class PycomGenerator extends AbstractGenerator{
 		'''
 		# This is the method that selects the appropriate sample rate for your «sensor.name»
 		def select_«sensor.name»_sampling_rate():
-		    measure = sample_from_«sensor.name»()
-		    for sampling_rate in cfg.«sensor.name»_sampling_rates.sort(key=lambda x: x["condition"], reverse=True):
-		        if sampling_rate["condition"] > measure:
-		            return sampling_rate["rate"]
-		    return cfg.default_sampling_rate
+			measure = single_measurement_from_«sensor.name»()
+			for sampling_rate in cfg.sampling_rates_«sensor.name».sort(key=lambda x: x["condition"], reverse=True):
+				if sampling_rate["condition"] > measure:
+					return sampling_rate["rate"]
+				return cfg.default_sampling_rate
+		    
+		«sensor.generateSingleMeasurement»
 		    
 		    
 		'''
 	}
+	
+	def CharSequence generateSingleMeasurement(Sensor sensor) {
+		switch sensor.sensorType{
+			Light: sensor.generateSingleLightMeasurement
+			Temp: sensor.generateSingleTempMeasurement
+		}
+	}
+	
+	def CharSequence generateSingleLightMeasurement(Sensor sensor) {
+		'''
+		def single_measurement_from_«sensor.name»():
+			return als.light()[0]
+		'''
+	}
+	
+	def CharSequence generateSingleTempMeasurement(Sensor sensor) {
+		'''
+		def single_measurement_from_«sensor.name»():
+			return get_deg_c()
+		'''
+	}
+	
+	
+	
 	
 	
 	def CharSequence initLight(Sensor sensor)
