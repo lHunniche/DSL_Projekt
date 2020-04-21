@@ -38,7 +38,7 @@ class WebserverGenerator extends AbstractGenerator {
 	def CharSequence generateEndpoint(String endpoint)
 	{
 	'''
-	@app.route("«endpoint»", methods=["POST"])
+	@app.route("/«endpoint»", methods=["POST"])
 	def get_«endpoint.replace("\"", "").replace("/", "")»():
 		_body = request.get_json()
 		_args = request.args
