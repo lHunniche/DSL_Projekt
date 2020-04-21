@@ -4,30 +4,30 @@ import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
-import dk.klevang.iotdsl.Webserver
+import dk.klevang.iotdsl.WebServer
 
 class WebserverGenerator extends AbstractGenerator {
 	
 	override doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		resource.allContents.filter(Webserver).forEach[generateServerFiles(fsa)]
+		resource.allContents.filter(WebServer).forEach[generateServerFiles(fsa)]
 	}
 	
 	
-	def generateServerFiles(Webserver server, IFileSystemAccess2 fsa) 
+	def generateServerFiles(WebServer server, IFileSystemAccess2 fsa) 
 	{
-		fsa.generateFile(server.name+".py", server.generateServer)
+		fsa.generateFile(server.name.name + ".py", server.generateServer)
 	}
 	
 	
-	def CharSequence generateServer(Webserver server)
+	def CharSequence generateServer(WebServer server)
 	{
 	'''
 	from flask import Flask, request, jsonify, make_response
 	app = Flask(__name__)
 
 
-	«FOR endpoint: server.getWebEndpoint.split(";")»
-		«endpoint.generateEndpoint»
+	«FOR endpoint: server.webEndpoints»
+		«endpoint.name.generateEndpoint»
 	«ENDFOR»
 	
 	«server.generateRun»
@@ -38,7 +38,7 @@ class WebserverGenerator extends AbstractGenerator {
 	def CharSequence generateEndpoint(String endpoint)
 	{
 	'''
-	@app.route(«endpoint», methods=["POST"])
+	@app.route("«endpoint»", methods=["POST"])
 	def get_«endpoint.replace("\"", "").replace("/", "")»():
 		_body = request.get_json()
 		_args = request.args
@@ -51,7 +51,7 @@ class WebserverGenerator extends AbstractGenerator {
 	}
 	
 	
-	def CharSequence generateRun(Webserver server)
+	def CharSequence generateRun(WebServer server)
 	{
 	'''
 	if __name__ == "__main__":
