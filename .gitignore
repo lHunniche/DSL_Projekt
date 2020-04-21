@@ -6,3 +6,5 @@ bin/
 model
 */generated/
 .metadata/
+dk.klevang.iotdsl/dk.klevang.iotdsl.tests/test-bin/dk/klevang/tests/.IotdslParsingTest.java._trace
+dk.klevang.iotdsl/dk.klevang.iotdsl.tests/test-bin/dk/klevang/tests/.IotdslParsingTest.xtendbin
