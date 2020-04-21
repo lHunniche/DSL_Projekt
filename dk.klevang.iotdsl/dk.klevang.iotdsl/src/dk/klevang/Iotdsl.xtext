@@ -22,7 +22,7 @@ Sensor:
 	{Sensor} 'sensor' sensorType=SensorType name=ID sensorSettings = SensorSettings 
 	'{' 
 	(conditions += Condition)* 
-	'endpoints' '=' (endpoints += EndpointRef)+
+	'endpoints' '=' endpoints += EndpointRef+
 	'}'
 ;
 
@@ -31,7 +31,7 @@ EndpointRef:
 ;
 
 DotReference:
-	web = [Webserver] '.' endpoint = [WebEndpoint]
+	web = [WebserverName] '.' endpoint = [WebEndpoint]
 ;
 
 SensorType:
@@ -78,11 +78,15 @@ Serial:
 ;
 
 Webserver:
-	'webserver' name=ID '(' host = Host ';' webPort = WebPort ';' 'endpoints' '=' webEndpoint = WebEndpoint')'
+	'webserver' name = WebserverName '(' host = Host ';' webPort = WebPort ';' 'endpoints' '=' webEndpoint = WebEndpoint')'
 ;
 
-WebEndpoint:
-	name = ID
+WebserverName returns Ref:
+	{WebserverName} name = ID
+;
+
+WebEndpoint returns Ref:
+	{WebEndpoint} name = ID
 ;
 
 WebPort:

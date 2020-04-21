@@ -12,6 +12,7 @@ import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
 
 import dk.klevang.iotdsl.DotReference;
+import dk.klevang.iotdsl.Ref;
 import dk.klevang.iotdsl.Sensor;
 import dk.klevang.iotdsl.WebEndpoint;
 import dk.klevang.iotdsl.Webserver;
@@ -31,18 +32,19 @@ public class IotdslScopeProvider extends AbstractIotdslScopeProvider {
 		System.out.println("\n");
 	    // We want to define the Scope for the Element's superElement cross-reference
 	    if (context instanceof DotReference) {
+	    	
+	    	
 	    	//System.out.println("Web: " + ((DotReference) context).getWeb());
 	    	//System.out.println("Endpoint: " + ((DotReference) context).getEndpoint());
 	        // Collect a list of candidates by going through the model
 	        // EcoreUtil2 provides useful functionality to do that
 	        // For example searching for all elements within the root Object's tree
-	        EObject rootElement = EcoreUtil2.getRootContainer(context);
-	        List<WebEndpoint> candidates = EcoreUtil2.getAllContentsOfType(rootElement, WebEndpoint.class);
-	        // Create IEObjectDescriptions and puts them into an IScope instance
-	        return Scopes.scopeFor(candidates);
-	    }
-	    else if (context instanceof WebEndpoint) {
 	    	
+	    	
+	        EObject rootElement = EcoreUtil2.getRootContainer(context);
+	        List<Ref> candidates = EcoreUtil2.getAllContentsOfType(rootElement, Ref.class);
+	        // Create IEObjectDescriptions and puts them into an IScope instanceWebEndpoint.cl
+	        return Scopes.scopeFor(candidates);
 	    }
 	    return super.getScope(context, reference);
 	}

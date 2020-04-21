@@ -44,7 +44,7 @@ class IotdslGenerator extends AbstractGenerator {
 	
 	def generateServerFiles(Webserver server, IFileSystemAccess2 fsa) 
 	{
-		fsa.generateFile(server.name+".py", server.generateServer)
+		fsa.generateFile(server.name.name+".py", server.generateServer)
 	}
 	
 
