@@ -13,6 +13,9 @@ import dk.klevang.iotdsl.Barometer
 import dk.klevang.iotdsl.Pier
 import dk.klevang.iotdsl.Accelerometer
 import dk.klevang.iotdsl.Humidity
+import dk.klevang.iotdsl.FilterType
+import java.util.List
+import java.util.Set
 
 class Esp32Generator extends AbstractGenerator{
 	
@@ -22,8 +25,9 @@ class Esp32Generator extends AbstractGenerator{
 	
 	def generateBoardFiles(Board board, IFileSystemAccess2 fsa) 
 	{
-		if(board.boardType == "Esp32"){
-		fsa.generateFile(board.name + "_" + board.boardType + ".py", board.generateFileContent)
+		if (board.boardType == "Esp32")
+		{
+			fsa.generateFile(board.name + "_" + board.boardType + ".py", board.generateFileContent)
 		}
 	}
 	
@@ -33,38 +37,121 @@ class Esp32Generator extends AbstractGenerator{
 		«board.generateImports»
 		«board.generateInternetConnection»
 		«board.sensors.generateInitSensors»
-		
-		
-		def init_sensors():
-			«FOR sensor : board.sensors»
-			_thread.start_new_thread(start_«sensor.name»_sampling)
-			«ENDFOR»
-		
-		def run():
-			connect()
-			init_sensors()
-		
-		if __name__ == "main":
-			run()
+		«board.eAllContents.filter(FilterType).map[FilterType f | f.type].toSet.generateFilterFunction»
+		«generateIntermediateSampleFunction»
+		«board.generateMainFunction»
+		«board.sensors.generateSensorInitFunctions»
+		«board.sensors.generateSamplingLoops»
+		run()
 		'''
+	}
+	
+	def CharSequence generateSamplingLoops(EList<Sensor> sensors){
+		'''
+		«FOR sensor: sensors»
+		def start_«sensor.name»_sampling():
+			endpoints = cfg.endpoints["«sensor.name»"]
+			while True:
+				«sensor.name»_sample = sample_from_«sensor.name»()
+				for url in endpoints:
+					body = {
+						"«sensor.name»": «sensor.name»_sample
+					}
+					post(url, body)
+					
+					
+		«ENDFOR»
+		
+		'''
+	}
+	
+	def CharSequence generateSensorInitFunctions(EList<Sensor> sensors){
+		'''
+		def init_sensors():
+			«FOR sensor: sensors»
+			_thread.start_new_thread(start_«sensor.name»_sampling, ())
+			«ENDFOR»
+			
+			
+		'''
+	}
+	
+	def CharSequence generateMainFunction(Board board){
+		'''
+		def run():
+			«IF board.internet !== null»
+			connect()
+			«ELSE»
+			#connect()
+			«ENDIF»
+			«IF !board.sensors.empty»
+			init_sensors()
+			«ELSE»
+			#init_sensors()
+			«ENDIF»
+			
+			
+		'''
+	}
+	
+	def CharSequence generateIntermediateSampleFunction() {
+		
+		'''
+		def get_intermediate_sampling_rate(sample_rate_function, count):
+			sampling_rate = sample_rate_function()
+			seconds = 1/sampling_rate
+			intermediate_sampling_rate = seconds/count
+			return intermediate_sampling_rate
+			
+			
+		'''
+	}
+	
+
+	def CharSequence generateFilterFunction(Set<String> filterTypes)
+	{
+		'''
+		«FOR filterType: filterTypes»
+			«IF filterType == "mean"»
+				def mean(intermediate_points):
+					return sum(intermediate_points)/len(intermediate_points)
+					
+					
+			«ELSEIF filterType == "median"»
+				def median(intermediate_points):
+				    sorted(intermediate_points)
+				    index = int(len(intermediate_points)/2)
+				    return intermediate_points[index]
+				    
+				    
+			«ELSE»
+				#Filter types go here
+			«ENDIF»
+		«ENDFOR»
+		'''
+		  
+	
 	}
 	
 	def CharSequence generateImports(Board board)
 	{
-	'''
-	«IF board.internet !== null»
-	from network import WLAN
-	import urequests
-	«ENDIF»
-	
-	import machine
-	from machine import Pin
-	import time
-	from bh1750 import BH1750 #NEEDS TO BE ON THE BOARD https://github.com/PinkInk/upylib/tree/master/bh1750
-	
-	import «board.name»_«board.boardType»_config as cfg
-	import _thread
-	'''
+		'''
+		«IF board.internet !== null»
+		from network import WLAN
+		import urequests
+		«ENDIF»
+
+		import machine
+		from machine import Pin, I2C,ADC
+		import time
+		
+		#Light sensor libraries
+		from bh1750 import BH1750 #NEEDS TO BE ON THE BOARD https://github.com/PinkInk/upylib/tree/master/bh1750
+		
+		import «board.name»_«board.boardType»_config as cfg
+		import _thread
+		
+		'''
 	}
 	
 	def CharSequence generateInternetConnection(Board board)
@@ -76,7 +163,6 @@ class Esp32Generator extends AbstractGenerator{
 		else
 		{
 			'''
-
 			def connect():
 			    passw = cfg.internet["passw"]
 			    ssid = cfg.internet["ssid"]
@@ -86,15 +172,18 @@ class Esp32Generator extends AbstractGenerator{
 			        print(net.ssid)
 			        if net.ssid == ssid:
 			            print(ssid, ' found!')
-			            wlan.connect(net.ssid, auth=(net.sec, wifi_pass), timeout=5000)
+			            wlan.connect(net.ssid, auth=(net.sec, passw), timeout=5000)
 			            while not wlan.isconnected():
-			                machine.idle() # save power while waiting
-			            print('WLAN connection to ', ssid,' succesful!')
+			                machine.idle()  # save power while waiting
+			            print('WLAN connection to ', ssid, ' succesful!')
 			            break
-			            
+			 
+			 
 			def post(url, body):
-			    res = urequests.post(url, headers={"Content-Type": "application/json","Accept": "application/json"}, json=body)
-			    res.close()  
+				res = urequests.post(url, headers={"Content-Type": "application/json", "Accept": "application/json"}, json=body)
+				res.close()
+			
+			
 			'''
 		}
 		
@@ -116,209 +205,226 @@ class Esp32Generator extends AbstractGenerator{
 			Temp: sensor.initTemp
 			Barometer: sensor.initBarometer
 			Pier: sensor.initPier
-			Accelerometer: sensor.initAccelerometer
+			Accelerometer: sensor.initAccelerometer 
 			Humidity: sensor.initHumidity
 		}
 	}
 	
-
-	def CharSequence initLight(Sensor sensor)	
-	{	
-	'''
-	
-	def init_light(als_sda = «sensor.sensorSettings.pins.pinOut», als_scl = «sensor.sensorSettings.pins.pinIn»):
-		als = BH1750(I2C(sda=als_sda,scl=als_scl)) 
-		return als
-	
-	def get_lux():
-		lux = round(sensor.luminance(BH1750.ONCE_HIRES_1))
-		return lux
-	
-	«sensor.getSamplingRate»
-	
-	«sensor.generateSampleFunction»
-	'''
-	
-	}
-	def CharSequence initTemp(Sensor sensor)
+	def CharSequence generateSampling(Sensor sensor)
 	{
-	'''
+		'''
+		# This is the method that selects the appropriate sample rate for your «sensor.name»
+		def select_«sensor.name»_sampling_rate():
+			measure = single_measurement_from_«sensor.name»()
+			cfg.sampling_rates_«sensor.name».sort(key=lambda x: x["condition"], reverse=True)
+			for sampling_rate in cfg.sampling_rates_«sensor.name»:
+				if sampling_rate["condition"] < measure:
+					return sampling_rate["rate"]
+			return cfg.default_sampling_rate
+		    
+		«sensor.generateSingleMeasurement»
+		    
+		    
+		'''
+	}
 	
-	def init_temp(temp_sda = «sensor.sensorSettings.pins.pinOut», temp_scl = «sensor.sensorSettings.pins.pinIn»):
-		adc = machine.ADC()  
-		adc.atten(ADC.ATTN_6DB)
-		adc.width(ADC.WIDTH_12BIT)
-		apin = adc.channel(pin=temp_sda) 
-		power = Pin(temp_scl, mode=Pin.OUT)
-		power.value(1)
-		return apin
+	def CharSequence generateSingleMeasurement(Sensor sensor) {
+		switch sensor.sensorType{
+			Light: sensor.generateSingleLightMeasurement
+			Temp: sensor.generateSingleTempMeasurement
+		}
+	}
+	
+	def CharSequence generateSingleLightMeasurement(Sensor sensor) {
+		'''
+		def single_measurement_from_«sensor.name»():
+			return als.light()[0]
+		'''
+	}
+	
+	def CharSequence generateSingleTempMeasurement(Sensor sensor) {
+		'''
+		def single_measurement_from_«sensor.name»():
+			return get_deg_c()
+		'''
+	}
+	
+	
+	
+	
+	
+	def CharSequence initLight(Sensor sensor)
+	{
+		'''
+		# This method initialises the Light sensor on your PyCom device
+		def init_light(als_sda=cfg.pins["«sensor.name»_in"], als_scl=cfg.pins["«sensor.name»_out"]):
+		    als = BH1750(I2C(sda=als_sda,scl=als_scl)) 		    
+		    return als
+		    
+		als = init_light()
 		
-	apin = init_temp()
-	
-	def get_celcius_from_mv(mv):
-		voltage_conversion=((mv*2)/4096)
-		return ((voltage_conversion-0.5)/0.01)
-	
-	def get_deg_c():
-		mv = apin.read()
-		deg_c = get_celcius_from_mv(mv)
-		return deg_c
-	
-	«sensor.getSamplingRate»
-	
-	«sensor.generateSampleFunction»
-	'''
-	}
-	
-	def CharSequence initBarometer(Sensor sensor)
-	{
-		'''
-		 NOT YET SUPPORTED
+		
+		«sensor.generateSampling»
+		
+		
+		«sensor.generateSampleFunction»
 		'''
 	}
-	
-	def CharSequence initPier(Sensor sensor)
-	{
-		'''
-		 NOT YET SUPPORTED
-		'''
-	}
-	
-	def CharSequence initHumidity(Sensor sensor)
-	{
-		'''
-		 NOT YET SUPPORTED
-		'''
-	}
-	
-	def CharSequence initAccelerometer(Sensor sensor)
-	{
-		'''
-		 NOT YET SUPPORTED
-		'''
-	}
-	
-	def CharSequence getSamplingRate(Sensor sensor)
-	{
-	var first = sensor.conditions.get(0)
-	'''
-	
-	def get_als_sampling_rate():
-		global als
-	
-		if als.light() «first.condition.op» «first.condition.value» :
-			return «first.frequency.value»
-		«FOR c: sensor.conditions»
-		«IF c.condition != first.condition»
-		elif als.light() «c.condition.op» «c.condition.value» :
-			return «c.frequency.value»	
-		«ENDIF» 
-		«ENDFOR»
-	'''
-	}
-	
-	
-	def CharSequence mean (Sensor sensor)
-	{
-	'''
-	def mean(sample_list, span):
-		start = sample_list.length() - span
-		collected = 0.0
-		for i in range(start, sample_list.length()):
-			collected =+ sample_list[i]
-		return collected / span
-	
-	'''	
-	} 
-	
 	
 	def CharSequence generateSampleFunction(Sensor sensor)
 	{
 		switch sensor.sensorType {
-			Light: sensor.LightSampleFunction
-			Temp: sensor.TempSampleFunction
-			Barometer: sensor.BarometerSampleFunction
-			Pier: sensor.PierSampleFunction
-			Accelerometer: sensor.AccelerometerSampleFunction
-			Humidity: sensor.HumiditySampleFunction
+			Light: sensor.generateLightSampleFunction
+			Temp: sensor.generateTempSampleFunction
+			Barometer: sensor.generateBarometerSampleFunction
+			Pier: sensor.generatePierSampleFunction
+			Accelerometer: sensor.generateAccelerometerSampleFunction
+			Humidity: sensor.generateHumiditySampleFunction
 		}
 	}
 	
-	def CharSequence LightSampleFunction(Sensor sensor)	
-	{
-	'''
-	def get_light_sample():
-		global light_filter_count
-		intermediate_points = []
-		while len(intermediate_points) < light_filter_count:
-			light_level = get_lux()
-			intermediate_points.append(light_level)
-			time.sleep(get_als_sampling_rate())
-			sorted(intermediate_points)
-		return intermediate_points[len(intermediate_points)/2]
-	
-	def start_light_sampling():
-		while True:
-			light_sample = get_light_sample()
-			for url in light_endpoints:
-				body = {
-					"light": light_sample
-				}
-				post(url, body)
-	'''
-	}
-	
-	def CharSequence TempSampleFunction(Sensor sensor)	
-	{
-	'''
-	def get_temp_sample():
-		global temp_filter_count
-		intermediate_points = []
-		while len(intermediate_points) < temp_filter_count:
-			temp_level = get_deg_c()
-			intermediate_points.append(temp_level)
-			time.sleep(get_temp_sampling_rate())
-		return sum(intermediate_points)/len(intermediate_points)
-	
-	def start_«sensor.name»_sampling():
-		global temp_endpoints
-		while True:
-			temp_sample = get_temp_sample()
-			for url in temp_endpoints:
-				body = {
-					"temp": temp_sample
-				}
-				post(url, body)	 
-	'''
-	}
-	
-	def CharSequence BarometerSampleFunction(Sensor sensor)	
+	def CharSequence generateLightSampleFunction(Sensor sensor)
 	{
 		'''
-		 NOT YET SUPPORTED
+		def sample_from_«sensor.name»():
+			filter_granularity = cfg.filter_granularities["«sensor.name»"]
+			intermediate_points = []
+			while len(intermediate_points) < filter_granularity:
+				light_level = als.light()[0]
+				intermediate_points.append(light_level)
+				intermediate_sampling_rate = get_intermediate_sampling_rate(\
+				            select_«sensor.name»_sampling_rate\
+				            , filter_granularity)
+				time.sleep(intermediate_sampling_rate)
+			return «sensor.sensorSettings.filter.filterType.type»(intermediate_points)
+			
+			
 		'''
 	}
 	
-	def CharSequence PierSampleFunction(Sensor sensor)	
+	
+	def CharSequence generateTempSampleFunction(Sensor sensor)
 	{
 		'''
-		 NOT YET SUPPORTED
+		def sample_from_«sensor.name»():
+			filter_granularity = cfg.filter_granularities["«sensor.name»"]
+			intermediate_points = []
+			while len(intermediate_points) < filter_granularity:
+				temp = get_deg_c()
+				intermediate_points.append(temp)
+				intermediate_sampling_rate = get_intermediate_sampling_rate(\
+				            select_«sensor.name»_sampling_rate\
+				            , filter_granularity)
+				time.sleep(intermediate_sampling_rate)
+			return «sensor.sensorSettings.filter.filterType.type»(intermediate_points)
+		
+		
 		'''
 	}
 	
-	def CharSequence AccelerometerSampleFunction(Sensor sensor)	
+	def CharSequence generateHumiditySampleFunction(Sensor sensor)
 	{
 		'''
-		 NOT YET SUPPORTED
+		#HUMIDITY NOT YET SUPPORTED, SORRY
 		'''
 	}
 	
-	def CharSequence HumiditySampleFunction(Sensor sensor)	
+	def CharSequence generatePierSampleFunction(Sensor sensor)
 	{
 		'''
-		 NOT YET SUPPORTED
+		#PIER NOT YET SUPPORTED, SORRY
 		'''
 	}
-
+	
+	def CharSequence generateAccelerometerSampleFunction(Sensor sensor)
+	{
+		'''
+		#ACCELEROMETER NOT YET SUPPORTED, SORRY
+		'''
+	}
+	
+	def CharSequence generateBarometerSampleFunction(Sensor sensor)
+	{
+		'''
+		#BAROMETER NOT YET SUPPORTED, SORRY
+		'''
+	}
+	
+	def CharSequence somemethod(Board board)
+	{
+		
+	}
+	
+	def CharSequence initTemp(Sensor sensor)
+	{
+		'''
+		# This method initialises the Temperature sensor on your PyCom device
+		def init_temp(temp_sda=cfg.pins["«sensor.name»_in"], temp_scl=cfg.pins["«sensor.name»_out"]):
+		    adc = machine.ADC()  
+		    adc.atten(ADC.ATTN_6DB)
+		    adc.width(ADC.WIDTH_12BIT)
+		    apin = adc.channel(pin=temp_sda) 
+		    power = Pin(temp_scl, mode=Pin.OUT)
+		    power.value(1)
+		    return apin
+		      		
+		apin = init_temp()
+		
+		«initTempUtil»
+		
+		«sensor.generateSampling»
+		
+		«sensor.generateSampleFunction»
+		'''
+	}
+	
+	def CharSequence initTempUtil(){
+		'''
+		def get_celcius_from_mv(mv):
+		    voltage_conversion=((mv*2)/4096)
+		    return ((voltage_conversion-0.5)/0.01)
+		
+		def get_deg_c():
+		  	mv = apin.read()
+		  	deg_c = get_celcius_from_mv(mv)
+		  	return deg_c
+		'''
+	}
+	
+	
+	def CharSequence initBarometer(Sensor sensor)
+	{
+		'''
+		#BAROMETER NOT YET SUPPORTED, SORRY
+		'''
+	}
+	
+	
+	def CharSequence initPier(Sensor sensor)
+	{
+		'''
+		#PIER NOT YET SUPPORTED, SORRY
+		'''
+	}
+	
+	
+	def CharSequence initAccelerometer(Sensor sensor)
+	{
+		'''
+		#ACCELEROMETER NOT YET SUPPORTED, SORRY
+		'''
+	}
+	
+	
+	def CharSequence initHumidity(Sensor sensor)
+	{
+		'''
+		#HUMIDITY NOT YET SUPPORTED, SORRY
+		'''
+	}
+	
+	
+	
+	
 	
 }
