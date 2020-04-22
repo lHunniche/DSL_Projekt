@@ -137,12 +137,12 @@ class Esp32Generator extends AbstractGenerator{
 	{
 		'''
 		«IF board.internet !== null»
-		from network import WLAN
+		from network import WLAN, STA_IF
 		import urequests
 		«ENDIF»
 
 		import machine
-		from machine import Pin, I2C,ADC
+		from machine import Pin, I2C, ADC
 		import time
 		
 		#Light sensor libraries
@@ -162,28 +162,27 @@ class Esp32Generator extends AbstractGenerator{
 		}
 		else
 		{
-			'''
-			def connect():
-			    passw = cfg.internet["passw"]
-			    ssid = cfg.internet["ssid"]
-			    wlan = WLAN(mode=WLAN.STA)
-			    nets = wlan.scan()
-			    for net in nets:
-			        print(net.ssid)
-			        if net.ssid == ssid:
-			            print(ssid, ' found!')
-			            wlan.connect(net.ssid, auth=(net.sec, passw), timeout=5000)
-			            while not wlan.isconnected():
-			                machine.idle()  # save power while waiting
-			            print('WLAN connection to ', ssid, ' succesful!')
-			            break
-			 
-			 
-			def post(url, body):
-				res = urequests.post(url, headers={"Content-Type": "application/json", "Accept": "application/json"}, json=body)
-				res.close()
-			
-			
+		'''
+		def connect():
+			passw = cfg.internet["passw"]
+			ssid = cfg.internet["ssid"]
+			wlan = WLAN(STA_IF)
+			wlan.active(True)
+			nets = wlan.scan()
+
+			for net in nets:
+				if str(net[0]) == "b'{}'".format(ssid):
+					print(ssid, ' found!')
+				wlan.connect(ssid, passw)
+				while not wlan.isconnected():
+					machine.idle()  # save power while waiting
+				print('WLAN connection to ', ssid, ' succesful!')
+				break
+
+		def post(url, body):
+			res = urequests.post("http://{}".format(url), headers={"Content-Type": "application/json", "Accept": "application/json"}, json=body)
+			res.close()
+
 			'''
 		}
 		
@@ -221,10 +220,9 @@ class Esp32Generator extends AbstractGenerator{
 				if sampling_rate["condition"] < measure:
 					return sampling_rate["rate"]
 			return cfg.default_sampling_rate
-		    
+
 		«sensor.generateSingleMeasurement»
-		    
-		    
+
 		'''
 	}
 	
@@ -238,7 +236,7 @@ class Esp32Generator extends AbstractGenerator{
 	def CharSequence generateSingleLightMeasurement(Sensor sensor) {
 		'''
 		def single_measurement_from_«sensor.name»():
-			return als.light()[0]
+			return round(als.luminance(BH1750.ONCE_HIRES_1))
 		'''
 	}
 	
@@ -247,20 +245,16 @@ class Esp32Generator extends AbstractGenerator{
 		def single_measurement_from_«sensor.name»():
 			return get_deg_c()
 		'''
-	}
-	
-	
-	
-	
+	}	
 	
 	def CharSequence initLight(Sensor sensor)
 	{
 		'''
 		# This method initialises the Light sensor on your PyCom device
 		def init_light(als_sda=cfg.pins["«sensor.name»_in"], als_scl=cfg.pins["«sensor.name»_out"]):
-		    als = BH1750(I2C(sda=als_sda,scl=als_scl)) 		    
-		    return als
-		    
+			als = BH1750(I2C(sda=Pin(int(als_sda), Pin.IN),scl=Pin(int(als_scl), Pin.OUT)))
+			return als
+
 		als = init_light()
 		
 		
@@ -287,18 +281,17 @@ class Esp32Generator extends AbstractGenerator{
 	{
 		'''
 		def sample_from_«sensor.name»():
-			filter_granularity = cfg.filter_granularities["«sensor.name»"]
+			filter_granularity = cfg.filter_granularities["kitchen_light"]
 			intermediate_points = []
 			while len(intermediate_points) < filter_granularity:
-				light_level = als.light()[0]
+				light_level = round(als.luminance(BH1750.CONT_HIRES_1))
 				intermediate_points.append(light_level)
 				intermediate_sampling_rate = get_intermediate_sampling_rate(\
-				            select_«sensor.name»_sampling_rate\
-				            , filter_granularity)
-				time.sleep(intermediate_sampling_rate)
-			return «sensor.sensorSettings.filter.filterType.type»(intermediate_points)
-			
-			
+					select_kitchen_light_sampling_rate\
+					, filter_granularity)
+			time.sleep(intermediate_sampling_rate)
+			return mean(intermediate_points)
+
 		'''
 	}
 	
@@ -360,13 +353,12 @@ class Esp32Generator extends AbstractGenerator{
 		'''
 		# This method initialises the Temperature sensor on your PyCom device
 		def init_temp(temp_sda=cfg.pins["«sensor.name»_in"], temp_scl=cfg.pins["«sensor.name»_out"]):
-		    adc = machine.ADC()  
-		    adc.atten(ADC.ATTN_6DB)
-		    adc.width(ADC.WIDTH_12BIT)
-		    apin = adc.channel(pin=temp_sda) 
-		    power = Pin(temp_scl, mode=Pin.OUT)
-		    power.value(1)
-		    return apin
+			adc = machine.ADC(Pin(int(temp_sda),Pin.IN))  
+			adc.atten(ADC.ATTN_6DB)
+			adc.width(ADC.WIDTH_12BIT)
+			power = Pin(int(temp_scl), Pin.OUT)
+			power.value(1)
+			return adc
 		      		
 		apin = init_temp()
 		
