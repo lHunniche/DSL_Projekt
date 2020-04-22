@@ -83,7 +83,6 @@ class ConfigGenerator extends AbstractGenerator{
 				}
 			}
 		}
-		println(validEndpoints)
 		
 		'''
 		«FOR endpoint : validEndpoints SEPARATOR ","»
