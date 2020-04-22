@@ -17,6 +17,7 @@ import dk.klevang.iotdsl.Ref
 import java.util.ArrayList
 
 class ConfigGenerator extends AbstractGenerator{
+	var Board _board 
 	
 	override doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		val webServers = resource.allContents.filter(WebServer).toList
@@ -30,6 +31,8 @@ class ConfigGenerator extends AbstractGenerator{
 	
 	
 	def CharSequence generateConfig(Board board, List<WebServer> servers) {
+		_board= board
+		
 		'''
 		«board.internet.generateInternetConfigs»
 
@@ -128,6 +131,8 @@ class ConfigGenerator extends AbstractGenerator{
 	
 	
 	def CharSequence generatePins(EList<Sensor> sensors) {
+		
+		
 		'''
 		pins = {
 			«FOR sensor: sensors SEPARATOR ","»
@@ -139,8 +144,15 @@ class ConfigGenerator extends AbstractGenerator{
 	
 	def CharSequence addPins(Sensor sensor) {
 		'''
+		«IF _board.boardType == 'Pycom'»
 		"«sensor.name»_in": 'P«sensor.sensorSettings.pins.pinIn»',
 		"«sensor.name»_out": 'P«sensor.sensorSettings.pins.pinOut»'
+		
+		«ELSEIF _board.boardType == 'Esp32'»
+		"«sensor.name»_in": '«sensor.sensorSettings.pins.pinIn»',
+		"«sensor.name»_out": '«sensor.sensorSettings.pins.pinOut»'
+		
+		«ENDIF»
 		'''
 	}
 	
