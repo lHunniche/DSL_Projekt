@@ -120,7 +120,7 @@ class Esp32Generator extends AbstractGenerator{
 			«ELSEIF filterType == "median"»
 				def median(intermediate_points):
 				    sorted(intermediate_points)
-				    index = int(len(intermediate_points)/2)
+				    index = int(len(intermediate_points)//2)
 				    return intermediate_points[index]
 				    
 				    
