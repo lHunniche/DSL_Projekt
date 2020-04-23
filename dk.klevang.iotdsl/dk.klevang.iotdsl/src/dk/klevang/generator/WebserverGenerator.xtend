@@ -39,7 +39,7 @@ class WebserverGenerator extends AbstractGenerator {
 	{
 	'''
 	@app.route("/«endpoint»", methods=["POST"])
-	def get_«endpoint.replace("\"", "").replace("/", "")»():
+	def «endpoint»():
 		_body = request.get_json()
 		_args = request.args
 		#body_data = _body.get("example")
