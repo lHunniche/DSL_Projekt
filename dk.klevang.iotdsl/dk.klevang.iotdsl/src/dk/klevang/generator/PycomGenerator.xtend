@@ -14,7 +14,6 @@ import dk.klevang.iotdsl.Pier
 import dk.klevang.iotdsl.Accelerometer
 import dk.klevang.iotdsl.Humidity
 import dk.klevang.iotdsl.FilterType
-import java.util.List
 import java.util.Set
 
 class PycomGenerator extends AbstractGenerator{
