@@ -4,17 +4,28 @@ import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IGeneratorContext
+import java.util.ArrayList
 import dk.klevang.iotdsl.Board
 import dk.klevang.iotdsl.Internet
 import dk.klevang.iotdsl.Sensor
 import org.eclipse.emf.common.util.EList
 import dk.klevang.iotdsl.Frequency
-import dk.klevang.iotdsl.WebEndpoint
 import java.util.List
 import dk.klevang.iotdsl.WebServer
 import dk.klevang.iotdsl.EndpointRef
 import dk.klevang.iotdsl.Ref
-import java.util.ArrayList
+import dk.klevang.iotdsl.Condition
+import dk.klevang.iotdsl.And
+
+import dk.klevang.iotdsl.BooleanExp
+import dk.klevang.iotdsl.Or
+import dk.klevang.iotdsl.Equality
+import dk.klevang.iotdsl.impl.AndImpl
+import dk.klevang.iotdsl.impl.OrImpl
+import dk.klevang.iotdsl.impl.EqualityImpl
+import dk.klevang.iotdsl.IntConstant
+import dk.klevang.iotdsl.BoolConstant
+import dk.klevang.iotdsl.ThisConstant
 
 class ConfigGenerator extends AbstractGenerator{
 	var Board _board 
@@ -45,9 +56,10 @@ class ConfigGenerator extends AbstractGenerator{
 		
 		«board.sensors.generateFilterGranularities»
 		
-		
 		«board.sensors.generateSamplingRates»
+		
 		'''
+		//«board.sensors.generateSamplingRates» SKAL MED IGEN NÅR BOOLEAN EXP VIRKER
 		
 	}
 	
@@ -180,26 +192,68 @@ class ConfigGenerator extends AbstractGenerator{
 	
 	def CharSequence generateSamplingRates(EList<Sensor> sensors) {
 		'''
+		default_sampling_rate = 0.5
+		
 		«FOR sensor: sensors»
 			«sensor.generateSamplingRates»
 		«ENDFOR»
-		default_sampling_rate = 0.5
 		'''
 	}
 	
 	
 	def CharSequence generateSamplingRates(Sensor sensor) {
+		
+		var conditionStrings = new ArrayList<String>
+		var rates = new ArrayList<Double>
+	
+		for (Condition cond : sensor.conditions)
+		{
+			conditionStrings.add(printBoolExp(cond.getBoolExp))
+			var freq = cond.frequency.generateFrequency
+			
+			//rounding to 3 digits
+			freq = ((freq * 1000) as int) 
+			freq = freq / 1000
+			  
+			rates.add(freq)
+		}
+		
+		//key is index, value is boolean expression
+		
 		'''
-		sampling_rates_«sensor.name» = [
-			«FOR condition: sensor.conditions SEPARATOR ","»
-			{
-				"condition": «condition.condition.value»,
-				"rate": «condition.frequency.generateFrequency»
-			}
+		def sampling_rates_«sensor.name»(sensor_value):
+			cond_rate_list = []
+			
+			«FOR pair: conditionStrings.indexed»
+				def condition_«pair.key+1»(sensor_value):
+					return «pair.value»
+				cond_rate_list.append((condition_«pair.key+1», «rates.get(pair.key)»))
+				
 			«ENDFOR»
-		]
+			for exp, rate in cond_rate_list:
+				if exp(sensor_value) == True:
+					return rate
+			return default_sampling_rate
+			
+			
 		'''
+		
+		//return '''#here goes a sample rate :)'''
 	}
+	
+	def String printBoolExp(BooleanExp exp) {
+	
+		return "" + switch exp {
+			And: exp.left.printBoolExp + " and " + exp.right.printBoolExp
+			Or: exp.left.printBoolExp + " or " + exp.right.printBoolExp
+			Equality: exp.left.printBoolExp + " " + exp.op + " " + exp.right.printBoolExp
+			IntConstant: exp.value
+			BoolConstant: if (exp.value == 'true') "True" else "False"
+			ThisConstant: "sensor_value"
+			default: ""
+		}
+	}
+
 	
 	
 	def double generateFrequency(Frequency frequency) {

@@ -11,7 +11,7 @@ ProgramElement:
 ;
 
 Board:
-	'board' boardType=BoardType name=ID '{' (sensors += Sensor)* internet = Internet? '}'
+	'board' boardType=BoardType name=ID ('extends' parent = [Board])? '{' (sensors += Sensor)* internet = Internet? '}'
 ;
 
 BoardType:
@@ -47,7 +47,7 @@ Pins:
 ;
 
 Condition:
-	'when' condition=SimpleComparison 'then' 'sampling' '=' frequency = Frequency
+	'when' boolExp=BooleanExp 'then' 'sampling' '=' frequency = Frequency
 ;
 
 
@@ -117,7 +117,7 @@ SimpleComparison:
 	'this' op = (">"|"<"|"!="|"==") value=INT
 ;
 
-BooleanExp returns BooleanExp:
+BooleanExp:
 	Or
 ;
 
@@ -136,7 +136,7 @@ And returns BooleanExp:
 ;
 Equality returns BooleanExp:
 	Comparison (
-		{Equlity.left=current} op = (">"|"<"|"!="|"==")
+		{Equality.left=current} op = (">"|"<"|"!="|"=="|">="|"<=")
 		right = Comparison
 	)*
 ;

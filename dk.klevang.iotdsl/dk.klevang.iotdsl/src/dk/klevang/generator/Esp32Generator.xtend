@@ -215,11 +215,7 @@ class Esp32Generator extends AbstractGenerator{
 		# This is the method that selects the appropriate sample rate for your «sensor.name»
 		def select_«sensor.name»_sampling_rate():
 			measure = single_measurement_from_«sensor.name»()
-			cfg.sampling_rates_«sensor.name».sort(key=lambda x: x["condition"], reverse=True)
-			for sampling_rate in cfg.sampling_rates_«sensor.name»:
-				if sampling_rate["condition"] < measure:
-					return sampling_rate["rate"]
-			return cfg.default_sampling_rate
+			return cfg.sampling_rates_«sensor.name»(measure)
 
 		«sensor.generateSingleMeasurement»
 
@@ -248,9 +244,9 @@ class Esp32Generator extends AbstractGenerator{
 	}	
 	
 	def CharSequence initLight(Sensor sensor)
-	{
+	{		
 		'''
-		# This method initialises the Light sensor on your PyCom device
+		# This method initialises the Light sensor on your Esp32 device
 		def init_light(als_sda=cfg.pins["«sensor.name»_in"], als_scl=cfg.pins["«sensor.name»_out"]):
 			als = BH1750(I2C(sda=Pin(int(als_sda), Pin.IN),scl=Pin(int(als_scl), Pin.OUT)))
 			return als
