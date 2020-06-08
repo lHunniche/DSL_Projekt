@@ -14,7 +14,6 @@ import dk.klevang.iotdsl.Pier
 import dk.klevang.iotdsl.Accelerometer
 import dk.klevang.iotdsl.Humidity
 import dk.klevang.iotdsl.FilterType
-import java.util.List
 import java.util.Set
 
 class Esp32Generator extends AbstractGenerator{
@@ -27,7 +26,7 @@ class Esp32Generator extends AbstractGenerator{
 	{
 		if (board.boardType == "Esp32")
 		{
-			fsa.generateFile(board.name + "_" + board.boardType + ".py", board.generateFileContent)
+			fsa.generateFile(board.name + "/" + board.name + "_" + board.boardType + ".py", board.generateFileContent)
 		}
 	}
 	

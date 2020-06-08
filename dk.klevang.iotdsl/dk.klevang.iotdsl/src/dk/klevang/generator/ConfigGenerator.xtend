@@ -20,12 +20,11 @@ import dk.klevang.iotdsl.And
 import dk.klevang.iotdsl.BooleanExp
 import dk.klevang.iotdsl.Or
 import dk.klevang.iotdsl.Equality
-import dk.klevang.iotdsl.impl.AndImpl
-import dk.klevang.iotdsl.impl.OrImpl
-import dk.klevang.iotdsl.impl.EqualityImpl
 import dk.klevang.iotdsl.IntConstant
 import dk.klevang.iotdsl.BoolConstant
 import dk.klevang.iotdsl.ThisConstant
+import java.util.HashSet
+import java.util.HashMap
 
 class ConfigGenerator extends AbstractGenerator{
 	var Board _board 
@@ -37,18 +36,37 @@ class ConfigGenerator extends AbstractGenerator{
 	
 	
 	def generateConfigFile(Board board, IFileSystemAccess2 fsa, List<WebServer> servers) {
-		fsa.generateFile(board.name + "_" + board.boardType + "_config.py", board.generateConfig(servers))
+		fsa.generateFile(board.name + "/" + board.name + "_" + board.boardType + "_config.py", board.generateConfig(servers))
 	}
 	
 	
 	def CharSequence generateConfig(Board board, List<WebServer> servers) {
-		_board= board
+		_board = board // should not be deleted, stoopid
+		
+		var sensorMap = new HashMap<String, Sensor>
+		
+		for (Sensor s : board.sensors)
+		{
+			sensorMap.putIfAbsent(s.name, s)
+		}
+		
+		if (board.extension !== null)
+		{
+			for (Sensor s : board.extension.parent.sensors)
+			{
+				sensorMap.putIfAbsent(s.name, s)
+			}
+		}
+		
+		var sensors = sensorMap.values.toList
+		
+		
 		
 		'''
-		«board.internet.generateInternetConfigs»
+		«board.generateInternetConfigs»
 
 
-		«board.sensors.generateEndpointConfigs(servers)»
+		«sensors.generateEndpointConfigs(servers)»
 
 
 		«board.sensors.generatePins»
@@ -59,19 +77,36 @@ class ConfigGenerator extends AbstractGenerator{
 		«board.sensors.generateSamplingRates»
 		
 		'''
-		//«board.sensors.generateSamplingRates» SKAL MED IGEN NÅR BOOLEAN EXP VIRKER
 		
 	}
 	
-	def CharSequence generateEndpointConfigs(EList<Sensor> sensors, List<WebServer> servers)
-	{	
+	def CharSequence generateEndpointConfigs(List<Sensor> sensors, List<WebServer> servers)
+	{
+//		var sensorMap = new HashMap<String, Sensor>
+//		
+//		for (Sensor s : board.sensors)
+//		{
+//			sensorMap.putIfAbsent(s.name, s)
+//		}
+//		
+//		if (board.extension !== null)
+//		{
+//			for (Sensor s : board.extension.parent.sensors)
+//			{
+//				sensorMap.putIfAbsent(s.name, s)
+//			}
+//		}
+//		
+//		var sensors = sensorMap.values.toList
+		
+		
 		'''
 		endpoints = {
-		«FOR sensor : sensors SEPARATOR ","»
-		"«sensor.name»" : [
-			«sensor.generateSensorEndpoint(servers)»
-			]
-		«ENDFOR»
+			«FOR sensor : sensors SEPARATOR ","»
+			"«sensor.name»" : [
+				«sensor.generateSensorEndpoint(servers)»
+				]
+			«ENDFOR»
 		}
 		'''
 	}
@@ -129,15 +164,27 @@ class ConfigGenerator extends AbstractGenerator{
 		return false
 	}
 	
-	def CharSequence generateInternetConfigs(Internet internet){
-		if(internet !== null) {
+	def CharSequence generateInternetConfigs(Board board){
+		if(board.internet !== null) 
+		{
 		'''
 			internet = {
-				"ssid": «internet.ssid»,
-				"passw": «internet.internetPass»
+				"ssid": «board.internet.ssid»,
+				"passw": «board.internet.internetPass»
 			}
 		'''
 		}
+		else if (board.extension.parent.internet !== null)
+		{
+			'''
+			internet = {
+				"ssid": «board.extension.parent.internet.ssid»,
+				"passw": «board.extension.parent.internet.internetPass»
+			}
+		'''
+		}
+		
+		
 	}
 	
 	
@@ -237,8 +284,6 @@ class ConfigGenerator extends AbstractGenerator{
 			
 			
 		'''
-		
-		//return '''#here goes a sample rate :)'''
 	}
 	
 	def String printBoolExp(BooleanExp exp) {

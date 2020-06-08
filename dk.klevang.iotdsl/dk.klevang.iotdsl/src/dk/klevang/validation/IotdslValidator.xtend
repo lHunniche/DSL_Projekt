@@ -40,7 +40,7 @@ class IotdslValidator extends AbstractIotdslValidator {
 		var seen = new HashSet<Board>
 		seen.add(board)
 		
-		checkParent(board.parent, seen)
+		checkParent(board.extension.parent, seen)
 	}
 	
 	def void checkParent(Board parent, HashSet<Board> seen)
@@ -51,11 +51,11 @@ class IotdslValidator extends AbstractIotdslValidator {
 		}
 		if (seen.contains(parent))
 		{
-			error("Cyclic inheritance not allowed.", parent, null)
+			error("Cyclic inheritance not allowed.", parent.extension, null)
 			return
 		}
 		seen.add(parent)
-		checkParent(parent.parent, seen)
+		checkParent(parent.extension.parent, seen)
 	}
 }
 

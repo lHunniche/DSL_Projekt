@@ -11,7 +11,11 @@ ProgramElement:
 ;
 
 Board:
-	'board' boardType=BoardType name=ID ('extends' parent = [Board])? '{' (sensors += Sensor)* internet = Internet? '}'
+	'board' boardType=BoardType name=ID extension=Extension? '{' (sensors += Sensor)* internet = Internet? '}'
+;
+
+Extension:
+	'extends' parent = [Board]
 ;
 
 BoardType:
