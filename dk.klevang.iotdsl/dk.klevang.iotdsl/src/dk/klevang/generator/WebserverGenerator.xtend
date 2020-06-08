@@ -44,7 +44,7 @@ class WebserverGenerator extends AbstractGenerator {
 		_args = request.args
 		#body_data = _body.get("example")
 		#args_data = _args.get("example")
-		return "return value", 200
+		return "return message", 200
 		
 		
 	'''	

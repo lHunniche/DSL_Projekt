@@ -11,7 +11,7 @@ ProgramElement:
 ;
 
 Board:
-	'board' boardType=BoardType name=ID extension=Extension? '{' (sensors += Sensor)* internet = Internet? '}'
+	(abstract ?= 'abstract')? 'board' boardType=BoardType name=ID extension=Extension? '{' (sensors += Sensor)* internet = Internet? '}'
 ;
 
 Extension:
@@ -23,7 +23,7 @@ BoardType:
 ;
 	
 Sensor:
-	{Sensor} 'sensor' sensorType=SensorType name=ID sensorSettings = SensorSettings 
+	{Sensor} (override ?= 'override')? 'sensor' sensorType=SensorType name=ID sensorSettings = SensorSettings 
 	'{' 
 	(conditions += Condition)* 
 	'endpoints' '=' endpoints += EndpointRef+
@@ -69,7 +69,7 @@ FilterType:
 	type='mean' value=INT | type='median' value=INT;
 
 Internet: 
-	'internet' '(' 'ssid' '=' ssid = Ssid ';' 'password' '=' internetPass = InternetPass ')';
+	(override ?= 'override')? 'internet' '(' 'ssid' '=' ssid = Ssid ';' 'password' '=' internetPass = InternetPass ')';
 
 InternetPass: 
 	STRING;

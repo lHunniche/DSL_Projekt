@@ -26,7 +26,11 @@ class Esp32Generator extends AbstractGenerator{
 	{
 		if (board.boardType == "Esp32")
 		{
-			fsa.generateFile(board.name + "/" + board.name + "_" + board.boardType + ".py", board.generateFileContent)
+			if (!board.isAbstract)
+			{
+				fsa.generateFile(board.name + "/" + board.name + "_" + board.boardType + ".py", board.generateFileContent)
+			}
+			
 		}
 	}
 	

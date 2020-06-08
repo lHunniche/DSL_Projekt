@@ -23,7 +23,6 @@ import dk.klevang.iotdsl.Equality
 import dk.klevang.iotdsl.IntConstant
 import dk.klevang.iotdsl.BoolConstant
 import dk.klevang.iotdsl.ThisConstant
-import java.util.HashSet
 import java.util.HashMap
 
 class ConfigGenerator extends AbstractGenerator{
@@ -36,7 +35,11 @@ class ConfigGenerator extends AbstractGenerator{
 	
 	
 	def generateConfigFile(Board board, IFileSystemAccess2 fsa, List<WebServer> servers) {
-		fsa.generateFile(board.name + "/" + board.name + "_" + board.boardType + "_config.py", board.generateConfig(servers))
+		if (!board.isAbstract)
+		{
+			fsa.generateFile(board.name + "/" + board.name + "_" + board.boardType + "_config.py", board.generateConfig(servers))
+		}
+		
 	}
 	
 	
@@ -69,12 +72,12 @@ class ConfigGenerator extends AbstractGenerator{
 		«sensors.generateEndpointConfigs(servers)»
 
 
-		«board.sensors.generatePins»
+		«sensors.generatePins»
 		
 		
-		«board.sensors.generateFilterGranularities»
+		«sensors.generateFilterGranularities»
 		
-		«board.sensors.generateSamplingRates»
+		«sensors.generateSamplingRates»
 		
 		'''
 		
@@ -188,7 +191,7 @@ class ConfigGenerator extends AbstractGenerator{
 	}
 	
 	
-	def CharSequence generatePins(EList<Sensor> sensors) {
+	def CharSequence generatePins(List<Sensor> sensors) {
 		
 		
 		'''
@@ -215,7 +218,7 @@ class ConfigGenerator extends AbstractGenerator{
 	}
 	
 	
-	def CharSequence generateFilterGranularities(EList<Sensor> sensors) {
+	def CharSequence generateFilterGranularities(List<Sensor> sensors) {
 		
 		'''
 		filter_granularities = {
@@ -237,7 +240,7 @@ class ConfigGenerator extends AbstractGenerator{
 	}
 
 	
-	def CharSequence generateSamplingRates(EList<Sensor> sensors) {
+	def CharSequence generateSamplingRates(List<Sensor> sensors) {
 		'''
 		default_sampling_rate = 0.5
 		
@@ -319,7 +322,7 @@ class ConfigGenerator extends AbstractGenerator{
 			return (value as double)/60/60
 		}
 		else {
-			return 0.5;
+			return value as double;
 		}
 	}
 	

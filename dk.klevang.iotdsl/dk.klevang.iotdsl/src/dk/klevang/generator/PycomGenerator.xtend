@@ -26,7 +26,11 @@ class PycomGenerator extends AbstractGenerator{
 	{
 		if (board.boardType == "Pycom")
 		{
-			fsa.generateFile(board.name + "/" + board.name + "_" + board.boardType + ".py", board.generateFileContent)
+			if (!board.isAbstract)
+			{
+				fsa.generateFile(board.name + "/" + board.name + "_" + board.boardType + ".py", board.generateFileContent)
+			}
+			
 		}
 	}
 	
