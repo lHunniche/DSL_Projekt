@@ -280,8 +280,8 @@ class ConfigGenerator extends AbstractGenerator{
 				cond_rate_list.append((condition_«pair.key+1», «rates.get(pair.key)»))
 				
 			«ENDFOR»
-			for exp, rate in cond_rate_list:
-				if exp(sensor_value) == True:
+			for sample_function, rate in cond_rate_list:
+				if sample_function(sensor_value) == True:
 					return rate
 			return default_sampling_rate
 			

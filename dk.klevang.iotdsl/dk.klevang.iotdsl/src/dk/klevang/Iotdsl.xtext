@@ -117,10 +117,6 @@ Host:
 	'host' '=' host = STRING
 ;
 
-SimpleComparison:
-	'this' op = (">"|"<"|"!="|"==") value=INT
-;
-
 BooleanExp:
 	Or
 ;

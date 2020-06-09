@@ -15,7 +15,7 @@ class WebserverGenerator extends AbstractGenerator {
 	
 	def generateServerFiles(WebServer server, IFileSystemAccess2 fsa) 
 	{
-		fsa.generateFile(server.name.name + ".py", server.generateServer)
+		fsa.generateFile("servers/" + server.name.name + ".py", server.generateServer)
 	}
 	
 	
