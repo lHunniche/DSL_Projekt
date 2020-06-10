@@ -1,5 +1,6 @@
 grammar dk.klevang.Iotdsl with org.eclipse.xtext.common.Terminals
 
+
 generate iotdsl "http://www.klevang.dk/Iotdsl"
 
 Program:

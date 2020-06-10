@@ -9,6 +9,10 @@ import dk.klevang.iotdsl.Board
 import java.util.HashSet
 import dk.klevang.iotdsl.Sensor
 import java.util.HashMap
+import dk.klevang.iotdsl.WebServer
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.emf.ecore.EObject
+import java.util.List
 
 /** 
  * This class contains custom validation rules. 
@@ -97,6 +101,20 @@ class IotdslValidator extends AbstractIotdslValidator {
 		else
 		{
 			parentHasInternet(board.extension.parent)
+		}
+	}
+	
+	
+	@Check
+	def void checkForDuplicateWebServerName(WebServer server)
+	{
+		var EObject rootElement = EcoreUtil2.getRootContainer(server, true)
+		var List<WebServer> servers = EcoreUtil2.getAllContentsOfType(rootElement, WebServer)
+		
+		for (WebServer _server : servers)
+		if (_server.name.name == server.name.name && _server !== server)
+		{
+			error("Duplicate server names", server.name, null)
 		}
 	}
 }

@@ -13,11 +13,13 @@ import dk.klevang.iotdsl.FilterType
 import java.util.Set
 import dk.klevang.auxil.BoardTemplates
 import dk.klevang.auxil.ExtensionHandler
+import java.util.List
 
-class PycomGenerator extends AbstractGenerator{
+class PycomGenerator{
 	
-	override doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		resource.allContents.filter(Board).forEach[generateBoardFiles(fsa)]
+	def generateFiles(List<Board> boards, IFileSystemAccess2 fsa) 
+	{
+		boards.forEach[generateBoardFiles(fsa)]
 	}
 	
 	def generateBoardFiles(Board board, IFileSystemAccess2 fsa) 
@@ -26,10 +28,6 @@ class PycomGenerator extends AbstractGenerator{
 		{
 			if (!board.isAbstract)
 			{
-				if (board.extension !== null)
-				{
-					ExtensionHandler.prepareExtendedBoard(board)
-				}
 				fsa.generateFile(board.name + "/" + board.name + "_" + board.boardType + ".py", board.generateFileContent)
 			}
 			
@@ -85,7 +83,7 @@ class PycomGenerator extends AbstractGenerator{
 	def CharSequence generateImports(Board board)
 	{
 		'''
-		«IF board.internet !== null || board.extension.parent.internet !== null»
+		«IF board.internet !== null || board.extension !== null && board.extension.parent.internet !== null»
 		from network import WLAN
 		import urequests
 		«ENDIF»
@@ -109,7 +107,7 @@ class PycomGenerator extends AbstractGenerator{
 	
 	def CharSequence generateInternetConnection(Board board)
 	{
-		if (board.internet === null && board.extension.parent.internet === null)
+		if (board.internet === null)
 		{
 			return ''''''
 		}

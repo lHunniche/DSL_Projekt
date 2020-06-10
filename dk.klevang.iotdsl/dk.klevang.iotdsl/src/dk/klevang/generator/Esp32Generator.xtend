@@ -12,11 +12,14 @@ import dk.klevang.iotdsl.Temp
 import dk.klevang.iotdsl.FilterType
 import java.util.Set
 import dk.klevang.auxil.BoardTemplates
+import java.util.List
 
-class Esp32Generator extends AbstractGenerator{
+class Esp32Generator
+{
 	
-	override doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		resource.allContents.filter(Board).forEach[generateBoardFiles(fsa)]
+	def generateFiles(List<Board> boards, IFileSystemAccess2 fsa) 
+	{
+		boards.forEach[generateBoardFiles(fsa)]
 	}
 	
 	def generateBoardFiles(Board board, IFileSystemAccess2 fsa) 

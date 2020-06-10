@@ -24,13 +24,15 @@ import dk.klevang.iotdsl.IntConstant
 import dk.klevang.iotdsl.BoolConstant
 import dk.klevang.iotdsl.ThisConstant
 import java.util.HashMap
+import dk.klevang.auxil.ExtensionHandler
 
-class ConfigGenerator extends AbstractGenerator{
+class ConfigGenerator
+{
 	var Board _board 
 	
-	override doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		val webServers = resource.allContents.filter(WebServer).toList
-		resource.allContents.filter(Board).forEach[generateConfigFile(fsa, webServers)]
+	def generateFiles(List<Board> boards, List<WebServer> webServers, IFileSystemAccess2 fsa) 
+	{
+		boards.forEach[generateConfigFile(fsa, webServers)]
 	}
 	
 	
@@ -46,38 +48,19 @@ class ConfigGenerator extends AbstractGenerator{
 	def CharSequence generateConfig(Board board, List<WebServer> servers) {
 		_board = board // should not be deleted, stoopid
 		
-		var sensorMap = new HashMap<String, Sensor>
-		
-		for (Sensor s : board.sensors)
-		{
-			sensorMap.putIfAbsent(s.name, s)
-		}
-		
-		if (board.extension !== null)
-		{
-			for (Sensor s : board.extension.parent.sensors)
-			{
-				sensorMap.putIfAbsent(s.name, s)
-			}
-		}
-		
-		var sensors = sensorMap.values.toList
-		
-		
-		
 		'''
 		«board.generateInternetConfigs»
 
 
-		«sensors.generateEndpointConfigs(servers)»
+		«board.sensors.generateEndpointConfigs(servers)»
 
 
-		«sensors.generatePins»
+		«board.sensors.generatePins»
 		
 		
-		«sensors.generateFilterGranularities»
+		«board.sensors.generateFilterGranularities»
 		
-		«sensors.generateSamplingRates»
+		«board.sensors.generateSamplingRates»
 		
 		'''
 		
@@ -177,15 +160,15 @@ class ConfigGenerator extends AbstractGenerator{
 			}
 		'''
 		}
-		else if (board.extension.parent.internet !== null)
-		{
-			'''
-			internet = {
-				"ssid": «board.extension.parent.internet.ssid»,
-				"passw": «board.extension.parent.internet.internetPass»
-			}
-		'''
-		}
+//		else if (board.extension.parent.internet !== null)
+//		{
+//			'''
+//			internet = {
+//				"ssid": «board.extension.parent.internet.ssid»,
+//				"passw": «board.extension.parent.internet.internetPass»
+//			}
+//		'''
+//		}
 		
 		
 	}

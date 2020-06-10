@@ -142,7 +142,7 @@ class BoardTemplates {
 			filter_granularity = cfg.filter_granularities["«sensor.name»"]
 			intermediate_points = []
 			while len(intermediate_points) < filter_granularity:
-				light_level = single_measurement_from_:«sensor.name»()
+				light_level = single_measurement_from_«sensor.name»()
 			 	intermediate_points.append(light_level)
 				intermediate_sampling_rate = get_intermediate_sampling_rate(\
 				            select_«sensor.name»_sampling_rate\

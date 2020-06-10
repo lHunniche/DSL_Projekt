@@ -5,11 +5,14 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
 import dk.klevang.iotdsl.WebServer
+import java.util.List
 
-class WebserverGenerator extends AbstractGenerator {
+class WebserverGenerator
+{
 	
-	override doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		resource.allContents.filter(WebServer).forEach[generateServerFiles(fsa)]
+	def generateFiles(List<WebServer> webServers, IFileSystemAccess2 fsa) 
+	{
+		webServers.forEach[generateServerFiles(fsa)]
 	}
 	
 	
