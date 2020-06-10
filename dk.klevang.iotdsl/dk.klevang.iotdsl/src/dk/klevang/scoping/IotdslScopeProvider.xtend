@@ -45,7 +45,6 @@ class IotdslScopeProvider extends AbstractIotdslScopeProvider {
 			
 			}	
 		}
-		println("Dot: " + dot.eContainingFeature.eCrossReferences)
 		
 		println(candidates)
 		
