@@ -14,6 +14,7 @@ import dk.klevang.iotdsl.Ref
 import dk.klevang.iotdsl.WebServerName
 import dk.klevang.iotdsl.WebEndpoint
 import dk.klevang.iotdsl.WebServer
+import dk.klevang.iotdsl.EndpointRef
 
 /** 
  * This class contains custom scoping description.
@@ -44,9 +45,7 @@ class IotdslScopeProvider extends AbstractIotdslScopeProvider {
 				candidates = candidates.filter[c | c instanceof WebEndpoint].toList
 			
 			}	
-		}
-		
-		println(candidates)
+		}	
 		
 		return Scopes.scopeFor(candidates)
 	}

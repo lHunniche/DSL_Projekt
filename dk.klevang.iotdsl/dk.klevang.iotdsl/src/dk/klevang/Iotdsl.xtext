@@ -27,7 +27,7 @@ Sensor:
 	{Sensor} (override ?= 'override')? 'sensor' sensorType=SensorType name=ID sensorSettings = SensorSettings 
 	'{' 
 	(conditions += Condition)* 
-	'endpoints' '=' endpoints += EndpointRef+
+	'endpoints' '=' endpoints += EndpointRef (";" endpoints += EndpointRef)*
 	'}'
 ;
 

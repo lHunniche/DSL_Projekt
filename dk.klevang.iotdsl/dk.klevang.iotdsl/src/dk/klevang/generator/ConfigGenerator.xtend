@@ -25,6 +25,7 @@ import dk.klevang.iotdsl.BoolConstant
 import dk.klevang.iotdsl.ThisConstant
 import java.util.HashMap
 import dk.klevang.auxil.ExtensionHandler
+import java.util.Arrays
 
 class ConfigGenerator
 {
@@ -68,24 +69,6 @@ class ConfigGenerator
 	
 	def CharSequence generateEndpointConfigs(List<Sensor> sensors, List<WebServer> servers)
 	{
-//		var sensorMap = new HashMap<String, Sensor>
-//		
-//		for (Sensor s : board.sensors)
-//		{
-//			sensorMap.putIfAbsent(s.name, s)
-//		}
-//		
-//		if (board.extension !== null)
-//		{
-//			for (Sensor s : board.extension.parent.sensors)
-//			{
-//				sensorMap.putIfAbsent(s.name, s)
-//			}
-//		}
-//		
-//		var sensors = sensorMap.values.toList
-		
-		
 		'''
 		endpoints = {
 			«FOR sensor : sensors SEPARATOR ","»
@@ -99,20 +82,32 @@ class ConfigGenerator
 	
 	def CharSequence generateSensorEndpoint(Sensor sensor, List<WebServer> servers)
 	{
+		// indeholder dot reference "board_server.lightdata"
 		val webEndpoints = sensor.endpoints.filter[e | e.dot !== null].toList
-		val validServers = servers.filter[server | server.validateServer(webEndpoints)].toList
+//		val validServers = servers.filter[server | server.validateServer(webEndpoints)].toList
 		val validEndpoints = new ArrayList<String>
-		
-		for (endpointRef : webEndpoints)
+//		
+//		for (endpointRef : webEndpoints)
+//		{
+//			for (server : validServers)
+//			{
+//				for (ref : server.webEndpoints)
+//				{
+//					if (endpointRef.dot.endpoint.name == ref.name)
+//					{
+//						validEndpoints.add(server.host.host + ":" + server.webPort.port + "/" + ref.name)
+//					}
+//				}
+//			}
+//		}
+
+		for (we : webEndpoints)
 		{
-			for (server : validServers)
+			for (server : servers)
 			{
-				for (ref : server.webEndpoints)
+				if (server.name.name == we.dot.web.name)
 				{
-					if (endpointRef.dot.endpoint.name == ref.name)
-					{
-						validEndpoints.add(server.host.host + ":" + server.webPort.port + "/" + ref.name)
-					}
+					validEndpoints.add(server.host.host + ":" + server.webPort.port + "/" + we.dot.endpoint.name)
 				}
 			}
 		}

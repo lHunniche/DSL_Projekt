@@ -13,6 +13,9 @@ import dk.klevang.iotdsl.WebServer
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.emf.ecore.EObject
 import java.util.List
+import dk.klevang.iotdsl.DotReference
+import dk.klevang.iotdsl.WebEndpoint
+import dk.klevang.iotdsl.Ref
 
 /** 
  * This class contains custom validation rules. 
@@ -115,6 +118,37 @@ class IotdslValidator extends AbstractIotdslValidator {
 		if (_server.name.name == server.name.name && _server !== server)
 		{
 			error("Duplicate server names", server.name, null)
+		}
+	}
+	
+	
+	@Check
+	def void checkForCorrectDotReferance(DotReference dot)
+	{
+		var dotServer = dot.web.name
+		var dotEndpoint = dot.endpoint.name
+		
+		var EObject rootElement = EcoreUtil2.getRootContainer(dot, true)
+		var List<WebServer> servers = EcoreUtil2.getAllContentsOfType(rootElement, WebServer)
+		
+		for (WebServer server : servers)
+		{
+			if (server.name.name == dotServer)
+			{
+				var endpointExists = false
+				for(Ref ref : server.webEndpoints)
+				{
+					var endpoint = ref as WebEndpoint
+					if (endpoint.name == dotEndpoint)
+					{
+						endpointExists = true
+					}
+				}
+				if (!endpointExists)
+				{
+					error("Invalid server/endpoint combination", dot, null)
+				}
+			}
 		}
 	}
 }
