@@ -40,7 +40,7 @@ DotReference:
 ;
 
 SensorType:
-	{Light} 'light' | {Temp} 'temp' | {Humidity} 'humidity' | {Barometer} 'barometer' | {Pier} 'pier' | {Accelerometer} 'accelerometer'
+	{Light} 'light' | {Temp} 'temp'
 ;
 
 SensorSettings:
@@ -54,7 +54,6 @@ Pins:
 Condition:
 	'when' boolExp=BooleanExp 'then' 'sampling' '=' frequency = Frequency
 ;
-
 
 Frequency:
 	{Frequency} value=INT ('Hz' | 'per' unit = Unit);
@@ -70,13 +69,8 @@ FilterType:
 	type='mean' value=INT | type='median' value=INT;
 
 Internet: 
-	(override ?= 'override')? 'internet' '(' 'ssid' '=' ssid = Ssid ';' 'password' '=' internetPass = InternetPass ')';
-
-InternetPass: 
-	STRING;
-
-Ssid: 
-	STRING;
+	(override ?= 'override')? 'internet' '(' 'ssid' '=' ssid = STRING ';' 'password' '=' internetPass = STRING ')';
+	
 
 Serial:
 	'serial' name=ID '(' serialPort = SerialPort (';' baud = Baud)? ';' output = Output ')'

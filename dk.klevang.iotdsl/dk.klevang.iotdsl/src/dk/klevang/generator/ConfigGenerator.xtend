@@ -112,8 +112,8 @@ class ConfigGenerator
 		{
 		'''
 			internet = {
-				"ssid": «board.internet.ssid»,
-				"passw": «board.internet.internetPass»
+				"ssid": "«board.internet.ssid»",
+				"passw": "«board.internet.internetPass»"
 			}
 		'''
 		}
