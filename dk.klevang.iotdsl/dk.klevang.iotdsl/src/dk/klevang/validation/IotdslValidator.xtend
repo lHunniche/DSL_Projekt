@@ -4,7 +4,6 @@
 package dk.klevang.validation
 
 import org.eclipse.xtext.validation.Check
-import dk.klevang.iotdsl.Condition
 import dk.klevang.iotdsl.Board
 import java.util.HashSet
 import dk.klevang.iotdsl.Sensor

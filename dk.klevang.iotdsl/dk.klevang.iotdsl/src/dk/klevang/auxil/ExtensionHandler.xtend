@@ -35,5 +35,20 @@ class ExtensionHandler
 		{
 			board.sensors.add(EcoreUtil2.copy(sensor))
 		}
-	}	
+	}
+	
+	def static int getInheritanceDepth(Board board)
+	{
+		var depth = 0
+		var current = board
+		
+		while (current.extension !== null)
+		{
+			depth += 1
+			current = current.extension.parent
+		}
+		
+		return depth
+	}
+	
 }

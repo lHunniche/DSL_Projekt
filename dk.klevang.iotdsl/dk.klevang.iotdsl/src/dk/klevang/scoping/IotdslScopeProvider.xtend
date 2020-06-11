@@ -13,8 +13,6 @@ import dk.klevang.iotdsl.DotReference
 import dk.klevang.iotdsl.Ref
 import dk.klevang.iotdsl.WebServerName
 import dk.klevang.iotdsl.WebEndpoint
-import dk.klevang.iotdsl.WebServer
-import dk.klevang.iotdsl.EndpointRef
 
 /** 
  * This class contains custom scoping description.

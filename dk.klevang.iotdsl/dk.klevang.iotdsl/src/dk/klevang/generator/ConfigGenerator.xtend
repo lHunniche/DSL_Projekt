@@ -1,14 +1,9 @@
 package dk.klevang.generator
 
 import org.eclipse.xtext.generator.IFileSystemAccess2
-import org.eclipse.xtext.generator.AbstractGenerator
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.generator.IGeneratorContext
 import java.util.ArrayList
 import dk.klevang.iotdsl.Board
-import dk.klevang.iotdsl.Internet
 import dk.klevang.iotdsl.Sensor
-import org.eclipse.emf.common.util.EList
 import dk.klevang.iotdsl.Frequency
 import java.util.List
 import dk.klevang.iotdsl.WebServer
@@ -23,9 +18,6 @@ import dk.klevang.iotdsl.Equality
 import dk.klevang.iotdsl.IntConstant
 import dk.klevang.iotdsl.BoolConstant
 import dk.klevang.iotdsl.ThisConstant
-import java.util.HashMap
-import dk.klevang.auxil.ExtensionHandler
-import java.util.Arrays
 
 class ConfigGenerator
 {
@@ -47,17 +39,14 @@ class ConfigGenerator
 	
 	
 	def CharSequence generateConfig(Board board, List<WebServer> servers) {
-		_board = board // should not be deleted, stoopid
+		_board = board
 		
 		'''
 		«board.generateInternetConfigs»
-
-
+		
 		«board.sensors.generateEndpointConfigs(servers)»
 
-
 		«board.sensors.generatePins»
-		
 		
 		«board.sensors.generateFilterGranularities»
 		
@@ -82,24 +71,8 @@ class ConfigGenerator
 	
 	def CharSequence generateSensorEndpoint(Sensor sensor, List<WebServer> servers)
 	{
-		// indeholder dot reference "board_server.lightdata"
 		val webEndpoints = sensor.endpoints.filter[e | e.dot !== null].toList
-//		val validServers = servers.filter[server | server.validateServer(webEndpoints)].toList
 		val validEndpoints = new ArrayList<String>
-//		
-//		for (endpointRef : webEndpoints)
-//		{
-//			for (server : validServers)
-//			{
-//				for (ref : server.webEndpoints)
-//				{
-//					if (endpointRef.dot.endpoint.name == ref.name)
-//					{
-//						validEndpoints.add(server.host.host + ":" + server.webPort.port + "/" + ref.name)
-//					}
-//				}
-//			}
-//		}
 
 		for (we : webEndpoints)
 		{
@@ -117,17 +90,6 @@ class ConfigGenerator
 			"«endpoint»"
 		«ENDFOR»
 		'''
-		/* 
-		'''
-		«FOR webEndpoint : webEndpoints SEPARATOR ","»
-			«FOR webServer : validServers»
-				"/«webEndpoint.dot.endpoint.name»"
-			«ENDFOR»
-		«ENDFOR»
-		'''
-		 */
-	
-		
 	}
 	
 	def Boolean validateServer(WebServer server, Iterable<EndpointRef> refs)
@@ -155,17 +117,6 @@ class ConfigGenerator
 			}
 		'''
 		}
-//		else if (board.extension.parent.internet !== null)
-//		{
-//			'''
-//			internet = {
-//				"ssid": «board.extension.parent.internet.ssid»,
-//				"passw": «board.extension.parent.internet.internetPass»
-//			}
-//		'''
-//		}
-		
-		
 	}
 	
 	
@@ -204,9 +155,7 @@ class ConfigGenerator
 			«sensor.addGranularity»
 			«ENDFOR»
 		}
-		'''
-		
-		
+		'''	
 	}
 	
 	
@@ -245,8 +194,6 @@ class ConfigGenerator
 			  
 			rates.add(freq)
 		}
-		
-		//key is index, value is boolean expression
 		
 		'''
 		def sampling_rates_«sensor.name»(sensor_value):

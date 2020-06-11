@@ -1,9 +1,6 @@
 package dk.klevang.generator
 
-import org.eclipse.xtext.generator.AbstractGenerator
-import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess2
-import org.eclipse.xtext.generator.IGeneratorContext
 import dk.klevang.iotdsl.Board
 import org.eclipse.emf.common.util.EList
 import dk.klevang.iotdsl.Sensor
@@ -38,13 +35,21 @@ class Esp32Generator
 	{
 		'''
 		«board.generateImports»
+		
 		«board.generateInternetConnection»
+		
 		«board.sensors.generateInitSensors»
+		
 		«board.eAllContents.filter(FilterType).map[FilterType f | f.type].toSet.generateFilterFunction»
+		
 		«generateIntermediateSampleFunction»
+		
 		«board.generateMainFunction»
+		
 		«board.sensors.generateSensorInitFunctions»
+		
 		«board.sensors.generateSamplingLoops»
+		
 		run()
 		'''
 	}
@@ -98,7 +103,7 @@ class Esp32Generator
 	
 	def CharSequence generateInternetConnection(Board board)
 	{
-		if (board.internet === null && board.extension.parent.internet === null)
+		if (board.internet === null)
 		{
 			return ''''''
 		}
@@ -123,9 +128,8 @@ class Esp32Generator
 
 		«BoardTemplates.generatePostRequestFunction»
 
-			'''
+		'''
 		}
-		
 	}
 	
 	
@@ -134,20 +138,21 @@ class Esp32Generator
 		'''
 		«BoardTemplates.generateSampling(sensor)»
 		«sensor.generateSingleMeasurement»
-
 		'''
 	}
 	
 	
 	def CharSequence generateSingleMeasurement(Sensor sensor) {
-		switch sensor.sensorType{
+		switch sensor.sensorType
+		{
 			Light: sensor.generateSingleLightMeasurement
 			Temp: sensor.generateSingleTempMeasurement
 		}
 	}
 	
 	
-	def CharSequence generateSingleLightMeasurement(Sensor sensor) {
+	def CharSequence generateSingleLightMeasurement(Sensor sensor) 
+	{
 		'''
 		def single_measurement_from_«sensor.name»():
 			return round(als.luminance(BH1750.ONCE_HIRES_1))
@@ -155,7 +160,8 @@ class Esp32Generator
 	}
 	
 	
-	def CharSequence generateSingleTempMeasurement(Sensor sensor) {
+	def CharSequence generateSingleTempMeasurement(Sensor sensor) 
+	{
 		'''
 		def single_measurement_from_«sensor.name»():
 			return get_deg_c()
@@ -193,9 +199,7 @@ class Esp32Generator
 
 		als = init_light()
 		
-		
 		«sensor.generateSampling»
-		
 		
 		«sensor.generateSampleFunction»
 		'''

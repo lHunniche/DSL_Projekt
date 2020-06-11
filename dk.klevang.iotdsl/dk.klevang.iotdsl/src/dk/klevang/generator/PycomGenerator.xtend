@@ -1,9 +1,6 @@
 package dk.klevang.generator
 
-import org.eclipse.xtext.generator.AbstractGenerator
-import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess2
-import org.eclipse.xtext.generator.IGeneratorContext
 import dk.klevang.iotdsl.Board
 import org.eclipse.emf.common.util.EList
 import dk.klevang.iotdsl.Sensor
@@ -12,7 +9,6 @@ import dk.klevang.iotdsl.Temp
 import dk.klevang.iotdsl.FilterType
 import java.util.Set
 import dk.klevang.auxil.BoardTemplates
-import dk.klevang.auxil.ExtensionHandler
 import java.util.List
 
 class PycomGenerator{
@@ -38,13 +34,21 @@ class PycomGenerator{
 	{
 		'''
 		«board.generateImports»
+		
 		«board.generateInternetConnection»
+		
 		«board.sensors.generateInitSensors»
+		
 		«board.eAllContents.filter(FilterType).map[FilterType f | f.type].toSet.generateFilterFunction»
+		
 		«generateIntermediateSampleFunction»
+		
 		«board.generateMainFunction»
+		
 		«board.sensors.generateSensorInitFunctions»
+		
 		«board.sensors.generateSamplingLoops»
+		
 		run()
 		'''
 	}

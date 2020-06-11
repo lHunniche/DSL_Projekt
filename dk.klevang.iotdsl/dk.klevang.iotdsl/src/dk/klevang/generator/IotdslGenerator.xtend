@@ -9,10 +9,10 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
-import java.util.ArrayList
 import dk.klevang.iotdsl.Board
 import dk.klevang.iotdsl.WebServer
 import dk.klevang.auxil.ExtensionHandler
+import java.util.HashMap
 
 /**
  * Generates code from your model files on save.
@@ -31,20 +31,15 @@ class IotdslGenerator extends AbstractGenerator {
 		var boards = resource.allContents.filter(Board).toList
 		var webServers = resource.allContents.filter(WebServer).toList
 		
+		var depths = new HashMap<Board, Integer>
 		
-		println("--- BEFORE ---")
 		for (board : boards)
 		{
-			println("Name: " + board.name)
-			for (sensor : board.sensors)
-			{
-				println("Sensor: " + sensor.name)
-			}
-			println("Has internet? - " + board.internet)
-			println("\n----\n")
+			depths.put(board, ExtensionHandler.getInheritanceDepth(board))
 		}
-		println("--- BEFORE END ---")
 		
+		// generating the boards with the lowest inheritence depth first
+		boards = depths.entrySet.sortBy[value].map[key].toList
 		
 		for (Board board : boards)
 		{
@@ -53,19 +48,7 @@ class IotdslGenerator extends AbstractGenerator {
 				ExtensionHandler.prepareExtendedBoard(board)
 			}
 		}
-		
-		println("--- AFTER ---")
-		for (board : boards)
-		{
-			println("Name: " + board.name)
-			for (sensor : board.sensors)
-			{
-				println("Sensor: " + sensor.name)
-			}
-			println("Has internet? - " + board.internet)
-			println("----")
-		}
-		println("--- AFTER END ---")
+	
 		pycomGenerator.generateFiles(boards, fsa)
 		esp32Generator.generateFiles(boards, fsa)
 		configGenerator.generateFiles(boards, webServers, fsa)
