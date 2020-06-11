@@ -31,6 +31,21 @@ class IotdslGenerator extends AbstractGenerator {
 		var boards = resource.allContents.filter(Board).toList
 		var webServers = resource.allContents.filter(WebServer).toList
 		
+		
+		println("--- BEFORE ---")
+		for (board : boards)
+		{
+			println("Name: " + board.name)
+			for (sensor : board.sensors)
+			{
+				println("Sensor: " + sensor.name)
+			}
+			println("Has internet? - " + board.internet)
+			println("\n----\n")
+		}
+		println("--- BEFORE END ---")
+		
+		
 		for (Board board : boards)
 		{
 			if (board.extension !== null)
@@ -39,6 +54,18 @@ class IotdslGenerator extends AbstractGenerator {
 			}
 		}
 		
+		println("--- AFTER ---")
+		for (board : boards)
+		{
+			println("Name: " + board.name)
+			for (sensor : board.sensors)
+			{
+				println("Sensor: " + sensor.name)
+			}
+			println("Has internet? - " + board.internet)
+			println("----")
+		}
+		println("--- AFTER END ---")
 		pycomGenerator.generateFiles(boards, fsa)
 		esp32Generator.generateFiles(boards, fsa)
 		configGenerator.generateFiles(boards, webServers, fsa)

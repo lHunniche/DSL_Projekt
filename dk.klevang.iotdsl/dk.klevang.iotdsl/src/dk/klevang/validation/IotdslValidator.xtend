@@ -71,6 +71,7 @@ class IotdslValidator extends AbstractIotdslValidator {
 					if (!existing.override)
 					{
 						error("Duplicate sensor. If overriding from parent, use 'override' keyword", existing, null)
+						return
 					}
 					
 				}
@@ -82,18 +83,24 @@ class IotdslValidator extends AbstractIotdslValidator {
 	@Check
 	def void checkForMissingOverrideInternet(Board board)
 	{
+		var seen = new HashSet<Board>
 		if (board.internet === null || board.internet.override)
 		{
 			return
 		}
-		if (parentHasInternet(board)){
+		seen.add(board)
+		if (parentHasInternet(board, seen)){
 			error("Duplicate internet. If overriding from parent, use 'override' keyword", board.internet, null)
 		}
 	}
 	
-	def boolean parentHasInternet(Board board)
+	def boolean parentHasInternet(Board board, HashSet<Board> seen)
 	{
 		if (board.extension.parent === null)
+		{
+			return false
+		}
+		if (seen.contains(board.extension.parent))
 		{
 			return false
 		}
@@ -103,7 +110,8 @@ class IotdslValidator extends AbstractIotdslValidator {
 		}
 		else
 		{
-			parentHasInternet(board.extension.parent)
+			seen.add(board.extension.parent)
+			parentHasInternet(board.extension.parent, seen)
 		}
 	}
 	

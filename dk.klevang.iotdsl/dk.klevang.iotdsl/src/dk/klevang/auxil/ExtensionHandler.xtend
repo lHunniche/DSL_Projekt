@@ -35,14 +35,5 @@ class ExtensionHandler
 		{
 			board.sensors.add(EcoreUtil2.copy(sensor))
 		}
-		
-//		println("Type of list: " + board.sensors.class)
-//		println("Sensors before: " + board.extension.parent.sensors)
-//		var someList = new ArrayList<Sensor>
-//		someList.add(board.extension.parent.sensors.get(0))
-//		println("Sensors intermediate: " + board.extension.parent.sensors)
-//		board.sensors.add(board.extension.parent.sensors.get(0))
-//		println("Sensors after: " + board.extension.parent.sensors)
-		
 	}	
 }
