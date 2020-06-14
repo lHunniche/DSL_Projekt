@@ -31,15 +31,15 @@ class IotdslGenerator extends AbstractGenerator {
 		var boards = resource.allContents.filter(Board).toList
 		var webServers = resource.allContents.filter(WebServer).toList
 		
-		var depths = new HashMap<Board, Integer>
+		var inheritanceDepths = new HashMap<Board, Integer>
 		
 		for (board : boards)
 		{
-			depths.put(board, ExtensionHandler.getInheritanceDepth(board))
+			inheritanceDepths.put(board, ExtensionHandler.getInheritanceDepth(board))
 		}
 		
 		// generating the boards with the lowest inheritence depth first
-		boards = depths.entrySet.sortBy[value].map[key].toList
+		boards = inheritanceDepths.entrySet.sortBy[value].map[key].toList
 		
 		for (Board board : boards)
 		{

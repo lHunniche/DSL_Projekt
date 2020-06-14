@@ -130,7 +130,7 @@ class IotdslValidator extends AbstractIotdslValidator {
 	
 	
 	@Check
-	def void checkForCorrectDotReferance(DotReference dot)
+	def void checkForCorrectDotReference(DotReference dot)
 	{
 		var dotServer = dot.web.name
 		var dotEndpoint = dot.endpoint.name

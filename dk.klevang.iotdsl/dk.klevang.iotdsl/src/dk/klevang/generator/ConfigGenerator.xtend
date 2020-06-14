@@ -56,6 +56,7 @@ class ConfigGenerator
 		
 	}
 	
+	
 	def CharSequence generateEndpointConfigs(List<Sensor> sensors, List<WebServer> servers)
 	{
 		'''
@@ -68,6 +69,7 @@ class ConfigGenerator
 		}
 		'''
 	}
+	
 	
 	def CharSequence generateSensorEndpoint(Sensor sensor, List<WebServer> servers)
 	{
@@ -92,6 +94,7 @@ class ConfigGenerator
 		'''
 	}
 	
+	
 	def Boolean validateServer(WebServer server, Iterable<EndpointRef> refs)
 	{
 		for (EndpointRef endpointRef : refs)
@@ -106,6 +109,7 @@ class ConfigGenerator
 		}
 		return false
 	}
+	
 	
 	def CharSequence generateInternetConfigs(Board board){
 		if(board.internet !== null) 
@@ -131,6 +135,7 @@ class ConfigGenerator
 		}
 		'''
 	}
+	
 	
 	def CharSequence addPins(Sensor sensor) {
 		'''
@@ -214,6 +219,7 @@ class ConfigGenerator
 		'''
 	}
 	
+	
 	def String printBoolExp(BooleanExp exp) {
 	
 		return "" + switch exp {
@@ -227,7 +233,6 @@ class ConfigGenerator
 		}
 	}
 
-	
 	
 	def double generateFrequency(Frequency frequency) {
 		return calcFrequency(frequency.value, frequency.unit)
@@ -250,8 +255,4 @@ class ConfigGenerator
 			return value as double;
 		}
 	}
-	
-	
-	
-
 }
