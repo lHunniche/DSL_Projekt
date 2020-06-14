@@ -22,13 +22,16 @@ class IotdslGenerator extends AbstractGenerator {
 	val pycomGenerator = new PycomGenerator
 	val esp32Generator = new Esp32Generator
 	val webserverGenerator = new WebserverGenerator
+	val graphAppGenerator = new GraphAppGenerator
 	val generatorList = new ArrayList<AbstractGenerator>();
+	
 	
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		generatorList.add(configGenerator)
 		generatorList.add(pycomGenerator)
 		generatorList.add(esp32Generator)
 		generatorList.add(webserverGenerator)
+		generatorList.add(graphAppGenerator)
 		generatorList.forEach[doGenerate(resource, fsa, context)]
 	}
 }

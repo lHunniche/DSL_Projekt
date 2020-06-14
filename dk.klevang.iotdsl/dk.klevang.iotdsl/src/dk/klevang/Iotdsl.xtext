@@ -7,7 +7,7 @@ Program:
 ;
 
 ProgramElement:
-	Board | Serial | WebServer
+	Board | Serial | WebServer | GraphApp
 ;
 
 Board:
@@ -26,6 +26,56 @@ Sensor:
 	'}'
 ;
 
+//__________Mads' Grammatik_____________//
+
+
+GraphApp:
+	{GraphApp} 'graphapp' '{'
+		(graphs += Graph)*
+	'}'
+;
+
+Graph: 
+	{Graph} 'graph' graphType=GraphType 
+	
+;
+
+
+GraphType: 
+	Line  | Pie
+;
+
+Line:
+	{Line} type='line'
+	'{'
+		('color' '=' color = LineColor)?
+		('stroke' '=' stroke = INT)?
+		'sensor' '=' sensor = [Sensor]
+	'}'
+;
+
+
+Pie:
+	{Pie} type='pie'
+	'{'
+		('color' '=' color = PieColorScheme)?
+		'sensor' '=' sensor = [Sensor]
+	'}'
+;
+
+LineColor:
+	 name='red' |  name='green' | name='blue' 
+;
+
+
+PieColorScheme:
+	'colorfull' | "blue"
+;
+
+
+//_______________________________________//
+
+
 EndpointRef:
 	ref = [Serial] | dot = DotReference
 ;
@@ -35,7 +85,7 @@ DotReference:
 ;
 
 SensorType:
-	{Light} 'light' | {Temp} 'temp' | {Humidity} 'humidity' | {Barometer} 'barometer' | {Pier} 'pier' | {Accelerometer} 'accelerometer'
+	{Light} name='light' | {Temp} name='temp' | {Humidity} name='humidity' | {Barometer} name='barometer' | {Pier} name='pier' | {Accelerometer} name='accelerometer'
 ;
 
 SensorSettings:
