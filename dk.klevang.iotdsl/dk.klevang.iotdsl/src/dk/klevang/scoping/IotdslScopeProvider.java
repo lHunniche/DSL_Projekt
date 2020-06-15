@@ -58,7 +58,7 @@ public class IotdslScopeProvider extends AbstractIotdslScopeProvider {
             return Scopes.scopeFor(candidates);
 
 	    }
-	    else if(context instanceof Sensor && reference == Literals.SENSOR__PARENT){
+	    else if(context instanceof Sensor && reference == Literals.SENSOR){
 	    	Program program = (Program) EcoreUtil2.getRootContainer(context.eContainer());
 	    	ArrayList<Sensor> candidates = new ArrayList<Sensor>();
 
