@@ -1,31 +1,31 @@
 package dk.klevang.generator
 
-import org.eclipse.xtext.generator.AbstractGenerator
+import dk.klevang.iotdsl.Accelerometer
+import dk.klevang.iotdsl.Barometer
+import dk.klevang.iotdsl.BaseBoard
+import dk.klevang.iotdsl.Board
+import dk.klevang.iotdsl.FilterType
+import dk.klevang.iotdsl.Humidity
+import dk.klevang.iotdsl.Light
+import dk.klevang.iotdsl.Pier
+import dk.klevang.iotdsl.Sensor
+import dk.klevang.iotdsl.Temp
+import java.util.Set
+import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
-import dk.klevang.iotdsl.Board
-import org.eclipse.emf.common.util.EList
-import dk.klevang.iotdsl.Sensor
-import dk.klevang.iotdsl.Light
-import dk.klevang.iotdsl.Temp
-import dk.klevang.iotdsl.Barometer
-import dk.klevang.iotdsl.Pier
-import dk.klevang.iotdsl.Accelerometer
-import dk.klevang.iotdsl.Humidity
-import dk.klevang.iotdsl.FilterType
-import java.util.List
-import java.util.Set
 
 class Esp32Generator extends AbstractGenerator{
-	
+	var Board _board
 	override doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		resource.allContents.filter(Board).forEach[generateBoardFiles(fsa)]
 	}
 	
 	def generateBoardFiles(Board board, IFileSystemAccess2 fsa) 
 	{
-		if (board.boardType == "Esp32")
+		if (board.boardType == "Esp32" && !(board instanceof BaseBoard))
 		{
 			fsa.generateFile(board.name + "_" + board.boardType + ".py", board.generateFileContent)
 		}
@@ -33,15 +33,16 @@ class Esp32Generator extends AbstractGenerator{
 	
 	def CharSequence generateFileContent(Board board)
 	{
+		_board = GeneratorUtil.collectInfo(board)
 		'''
-		«board.generateImports»
-		«board.generateInternetConnection»
-		«board.sensors.generateInitSensors»
-		«board.eAllContents.filter(FilterType).map[FilterType f | f.type].toSet.generateFilterFunction»
+		«_board.generateImports»
+		«_board.generateInternetConnection»
+		«_board.sensors.generateInitSensors»
+		«_board.eAllContents.filter(FilterType).map[FilterType f | f.type].toSet.generateFilterFunction»
 		«generateIntermediateSampleFunction»
-		«board.generateMainFunction»
-		«board.sensors.generateSensorInitFunctions»
-		«board.sensors.generateSamplingLoops»
+		«_board.generateMainFunction»
+		«_board.sensors.generateSensorInitFunctions»
+		«_board.sensors.generateSamplingLoops»
 		run()
 		'''
 	}

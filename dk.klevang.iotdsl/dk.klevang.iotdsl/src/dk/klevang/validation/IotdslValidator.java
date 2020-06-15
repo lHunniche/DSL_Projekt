@@ -3,6 +3,10 @@
  */
 package dk.klevang.validation;
 
+import org.eclipse.xtext.validation.Check;
+
+import dk.klevang.iotdsl.Board;
+import dk.klevang.iotdsl.IotdslPackage;
 
 /**
  * This class contains custom validation rules. 
@@ -11,6 +15,8 @@ package dk.klevang.validation;
  */
 public class IotdslValidator extends AbstractIotdslValidator {
 	
+private static final String INVALID_BOARD_TYPE = "Unsupported Board Type";
+
 //	public static final INVALID_NAME = 'invalidName'
 //
 //	@Check
@@ -21,5 +27,12 @@ public class IotdslValidator extends AbstractIotdslValidator {
 //					INVALID_NAME);
 //		}
 //	}
-	
+	@Check
+	public void checkBoard (Board bt) {
+		if(!bt.getBoardType().equals("Pycom") && !bt.getBoardType().equals("Esp32")) {
+			error("Unsupported Board Type", IotdslPackage.Literals.BOARD__BOARD_TYPE, INVALID_BOARD_TYPE);
+		}
+		
+	}
+
 }

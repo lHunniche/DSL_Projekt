@@ -3,6 +3,7 @@
  */
 package dk.klevang.scoping;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
@@ -11,8 +12,14 @@ import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
 
+import dk.klevang.iotdsl.BaseSensor;
+import dk.klevang.iotdsl.Board;
+import dk.klevang.iotdsl.IotdslPackage.Literals;
+import dk.klevang.iotdsl.Program;
+import dk.klevang.iotdsl.ProgramElement;
 import dk.klevang.iotdsl.DotReference;
 import dk.klevang.iotdsl.Ref;
+import dk.klevang.iotdsl.Sensor;
 
 /**
  * This class contains custom scoping description.
@@ -39,6 +46,29 @@ public class IotdslScopeProvider extends AbstractIotdslScopeProvider {
 	        List<Ref> candidates = EcoreUtil2.getAllContentsOfType(rootElement, Ref.class);
 	        // Create IEObjectDescriptions and puts them into an IScope instanceWebEndpoint.cl
 	        return Scopes.scopeFor(candidates);
+	    }
+	    else if (context instanceof Board && reference == Literals.OVERRIDE_BOARD__PARENT){
+	    	Program program = (Program) EcoreUtil2.getRootContainer(context.eContainer());
+	    	ArrayList<Board> candidates = new ArrayList<Board>();
+
+            for (ProgramElement element : program.getProgramElements()) {
+                if (element instanceof Board) {
+                    candidates.add(((Board) element));
+                }
+            }
+            return Scopes.scopeFor(candidates);
+
+	    }
+	    else if(context instanceof Sensor && reference == Literals.OVERRIDE_SENSOR__PARENT){
+	    	Program program = (Program) EcoreUtil2.getRootContainer(context.eContainer());
+	    	ArrayList<Sensor> candidates = new ArrayList<Sensor>();
+
+	    	for (ProgramElement element : program.getProgramElements()) {
+	    		if (element instanceof BaseSensor) {
+	    			candidates.add(((Sensor) element));
+	    		}
+	    	}
+	    	return Scopes.scopeFor(candidates);
 	    }
 	    return super.getScope(context, reference);
 	}
