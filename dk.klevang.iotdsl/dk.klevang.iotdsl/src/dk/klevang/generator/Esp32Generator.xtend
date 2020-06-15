@@ -1,21 +1,20 @@
 package dk.klevang.generator
 
-import org.eclipse.xtext.generator.AbstractGenerator
+import dk.klevang.iotdsl.Accelerometer
+import dk.klevang.iotdsl.Barometer
+import dk.klevang.iotdsl.Board
+import dk.klevang.iotdsl.FilterType
+import dk.klevang.iotdsl.Humidity
+import dk.klevang.iotdsl.Light
+import dk.klevang.iotdsl.Pier
+import dk.klevang.iotdsl.Sensor
+import dk.klevang.iotdsl.Temp
+import java.util.Set
+import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
-import dk.klevang.iotdsl.Board
-import org.eclipse.emf.common.util.EList
-import dk.klevang.iotdsl.Sensor
-import dk.klevang.iotdsl.Light
-import dk.klevang.iotdsl.Temp
-import dk.klevang.iotdsl.Barometer
-import dk.klevang.iotdsl.Pier
-import dk.klevang.iotdsl.Accelerometer
-import dk.klevang.iotdsl.Humidity
-import dk.klevang.iotdsl.FilterType
-import java.util.List
-import java.util.Set
 
 class Esp32Generator extends AbstractGenerator{
 	
@@ -25,7 +24,7 @@ class Esp32Generator extends AbstractGenerator{
 	
 	def generateBoardFiles(Board board, IFileSystemAccess2 fsa) 
 	{
-		if (board.boardType == "Esp32")
+		if (board.boardType == "Esp32" && !board.isBase)
 		{
 			fsa.generateFile(board.name + "_" + board.boardType + ".py", board.generateFileContent)
 		}

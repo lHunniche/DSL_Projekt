@@ -11,7 +11,8 @@ ProgramElement:
 ;
 
 Board:
-	'board' boardType=BoardType name=ID '{' (sensors += Sensor)* internet = Internet? '}'
+	(base ?= 'base')? 'board' boardType=BoardType name=ID '{' (sensors += Sensor)* internet = Internet? '}' |
+	'board' boardType=BoardType? name=ID ('extends' parent = [Board])? '{' (sensors += Sensor)* internet = Internet? '}'
 ;
 
 BoardType:
@@ -19,7 +20,8 @@ BoardType:
 ;
 	
 Sensor:
-	{Sensor} 'sensor' sensorType=SensorType name=ID sensorSettings = SensorSettings 
+	{AbstractSensor} 'abstract' sensorType=SensorType 'sensor' name=ID sensorSettings = SensorSettings|
+	{Sensor} 'sensor' sensorType=SensorType? name=ID ('extends' parent = [Sensor])? sensorSettings = SensorSettings? 
 	'{' 
 	(conditions += Condition)* 
 	'endpoints' '=' endpoints += EndpointRef+

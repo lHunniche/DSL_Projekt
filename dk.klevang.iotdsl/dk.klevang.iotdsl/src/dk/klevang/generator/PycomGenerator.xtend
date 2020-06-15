@@ -24,7 +24,7 @@ class PycomGenerator extends AbstractGenerator{
 	
 	def generateBoardFiles(Board board, IFileSystemAccess2 fsa) 
 	{
-		if (board.boardType == "Pycom")
+		if (board.boardType == "Pycom" && !board.isBase)
 		{
 			fsa.generateFile(board.name + "_" + board.boardType + ".py", board.generateFileContent)
 		}
