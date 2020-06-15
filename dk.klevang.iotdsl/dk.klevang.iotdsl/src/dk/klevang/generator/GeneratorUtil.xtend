@@ -24,33 +24,23 @@ class GeneratorUtil {
 		
 		board.sensors.clear
 
-			for (sensor: sensorMap.values.toList){
-				if(!(sensor instanceof AbstractSensor)){
-					board.sensors.add(EcoreUtil2.copy(makeSensor(sensor)))
-				}
-				
-			}
-		
-		
-		
-		
+		for (sensor: sensorMap.values.toList){
+			if(!(sensor instanceof AbstractSensor)){
+				board.sensors.add(EcoreUtil2.copy(makeSensor(sensor)))
+			}				
+		}	
 		return board
 	}
-	
-	
-	static def Sensor makeSensor(Sensor sensor){
 		
-				if(sensor.parent !== null){
-					if(sensor.parent.sensorSettings !== null){
-						sensor.sensorSettings = EcoreUtil2.copy(sensor.parent.sensorSettings)
-					}
-					if(sensor.parent.sensorType !== null){
-						sensor.sensorType = sensor.parent.sensorType
-					}
-				}
-
-		
-		
+	static def Sensor makeSensor(Sensor sensor){	
+		if(sensor.parent !== null){
+			if(sensor.parent.sensorSettings !== null){
+				sensor.sensorSettings = EcoreUtil2.copy(sensor.parent.sensorSettings)
+			}
+			if(sensor.parent.sensorType !== null){
+				sensor.sensorType = sensor.parent.sensorType
+			}
+		}		
 		return sensor
 	}
 }
