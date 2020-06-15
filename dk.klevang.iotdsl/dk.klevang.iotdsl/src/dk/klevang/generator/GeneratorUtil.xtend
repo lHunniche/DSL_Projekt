@@ -1,12 +1,10 @@
 package dk.klevang.generator
 
-import org.eclipse.emf.common.util.EList
-import dk.klevang.iotdsl.Sensor
-import dk.klevang.iotdsl.Board
 import dk.klevang.iotdsl.AbstractSensor
-import org.eclipse.xtext.EcoreUtil2
+import dk.klevang.iotdsl.Board
+import dk.klevang.iotdsl.Sensor
 import java.util.HashMap
-import java.util.ArrayList
+import org.eclipse.xtext.EcoreUtil2
 
 class GeneratorUtil {
 	static def Board collectInfo(Board board){
@@ -27,8 +25,10 @@ class GeneratorUtil {
 		board.sensors.clear
 
 			for (sensor: sensorMap.values.toList){
+				if(!(sensor instanceof AbstractSensor)){
+					board.sensors.add(EcoreUtil2.copy(makeSensor(sensor)))
+				}
 				
-				board.sensors.add(EcoreUtil2.copy(makeSensor(sensor)))
 			}
 		
 		
@@ -40,10 +40,6 @@ class GeneratorUtil {
 	
 	static def Sensor makeSensor(Sensor sensor){
 		
-			if(sensor instanceof AbstractSensor){
-				//Do nothing
-			}
-			else{
 				if(sensor.parent !== null){
 					if(sensor.parent.sensorSettings !== null){
 						sensor.sensorSettings = EcoreUtil2.copy(sensor.parent.sensorSettings)
@@ -52,9 +48,7 @@ class GeneratorUtil {
 						sensor.sensorType = sensor.parent.sensorType
 					}
 				}
-				
-				
-			}
+
 		
 		
 		return sensor
