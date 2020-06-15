@@ -15,17 +15,16 @@ import dk.klevang.iotdsl.Accelerometer
 import dk.klevang.iotdsl.Humidity
 import dk.klevang.iotdsl.FilterType
 import java.util.Set
-import dk.klevang.iotdsl.BaseBoard
 
 class PycomGenerator extends AbstractGenerator{
-	var Board _board
+	
 	override doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		resource.allContents.filter(Board).forEach[generateBoardFiles(fsa)]
 	}
 	
 	def generateBoardFiles(Board board, IFileSystemAccess2 fsa) 
 	{
-		if (board.boardType == "Pycom"&& !(board instanceof BaseBoard))
+		if (board.boardType == "Pycom")
 		{
 			fsa.generateFile(board.name + "_" + board.boardType + ".py", board.generateFileContent)
 		}
@@ -33,22 +32,20 @@ class PycomGenerator extends AbstractGenerator{
 	
 	def CharSequence generateFileContent(Board board)
 	{
-		_board = GeneratorUtil.collectInfo(board)
 		'''
-		«_board.generateImports»
-		«_board.generateInternetConnection»
-		«_board.sensors.generateInitSensors»
-		«_board.eAllContents.filter(FilterType).map[FilterType f | f.type].toSet.generateFilterFunction»
+		«board.generateImports»
+		«board.generateInternetConnection»
+		«board.sensors.generateInitSensors»
+		«board.eAllContents.filter(FilterType).map[FilterType f | f.type].toSet.generateFilterFunction»
 		«generateIntermediateSampleFunction»
-		«_board.generateMainFunction»
-		«_board.sensors.generateSensorInitFunctions»
-		«_board.sensors.generateSamplingLoops»
+		«board.generateMainFunction»
+		«board.sensors.generateSensorInitFunctions»
+		«board.sensors.generateSamplingLoops»
 		run()
 		'''
 	}
 	
 	def CharSequence generateSamplingLoops(EList<Sensor> sensors){
-		
 		'''
 		«FOR sensor: sensors»
 		def start_«sensor.name»_sampling():

@@ -1,20 +1,20 @@
 package dk.klevang.generator
 
-import dk.klevang.iotdsl.BaseBoard
-import dk.klevang.iotdsl.Board
-import dk.klevang.iotdsl.EndpointRef
-import dk.klevang.iotdsl.Frequency
-import dk.klevang.iotdsl.Internet
-import dk.klevang.iotdsl.Ref
-import dk.klevang.iotdsl.Sensor
-import dk.klevang.iotdsl.WebServer
-import java.util.ArrayList
-import java.util.List
-import org.eclipse.emf.common.util.EList
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
+import org.eclipse.xtext.generator.AbstractGenerator
+import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IGeneratorContext
+import dk.klevang.iotdsl.Board
+import dk.klevang.iotdsl.Internet
+import dk.klevang.iotdsl.Sensor
+import org.eclipse.emf.common.util.EList
+import dk.klevang.iotdsl.Frequency
+import dk.klevang.iotdsl.WebEndpoint
+import java.util.List
+import dk.klevang.iotdsl.WebServer
+import dk.klevang.iotdsl.EndpointRef
+import dk.klevang.iotdsl.Ref
+import java.util.ArrayList
 
 class ConfigGenerator extends AbstractGenerator{
 	var Board _board 
@@ -26,30 +26,27 @@ class ConfigGenerator extends AbstractGenerator{
 	
 	
 	def generateConfigFile(Board board, IFileSystemAccess2 fsa, List<WebServer> servers) {
-		if (!(board instanceof BaseBoard)){
-			fsa.generateFile(board.name + "_" + board.boardType + "_config.py", board.generateConfig(servers))
-		}
-		
+		fsa.generateFile(board.name + "_" + board.boardType + "_config.py", board.generateConfig(servers))
 	}
 	
 	
 	def CharSequence generateConfig(Board board, List<WebServer> servers) {
-		_board= GeneratorUtil.collectInfo(board)
+		_board= board
 		
 		'''
-		«_board.internet.generateInternetConfigs»
+		«board.internet.generateInternetConfigs»
 
 
-		«_board.sensors.generateEndpointConfigs(servers)»
+		«board.sensors.generateEndpointConfigs(servers)»
 
 
-		«_board.sensors.generatePins»
+		«board.sensors.generatePins»
 		
 		
-		«_board.sensors.generateFilterGranularities»
+		«board.sensors.generateFilterGranularities»
 		
 		
-		«_board.sensors.generateSamplingRates»
+		«board.sensors.generateSamplingRates»
 		'''
 		
 	}
@@ -133,6 +130,8 @@ class ConfigGenerator extends AbstractGenerator{
 	
 	
 	def CharSequence generatePins(EList<Sensor> sensors) {
+		
+		
 		'''
 		pins = {
 			«FOR sensor: sensors SEPARATOR ","»
@@ -157,7 +156,8 @@ class ConfigGenerator extends AbstractGenerator{
 	}
 	
 	
-	def CharSequence generateFilterGranularities(EList<Sensor> sensors) {		
+	def CharSequence generateFilterGranularities(EList<Sensor> sensors) {
+		
 		'''
 		filter_granularities = {
 			«FOR sensor: sensors SEPARATOR ","»
@@ -174,6 +174,7 @@ class ConfigGenerator extends AbstractGenerator{
 		'''
 		"«sensor.name»": «sensor.sensorSettings.filter.filterType.value»
 		'''
+		
 	}
 
 	
